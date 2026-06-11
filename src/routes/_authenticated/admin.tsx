@@ -20,17 +20,13 @@ export const Route = createFileRoute("/_authenticated/admin")({
 });
 
 function AdminPage() {
-  const { user } = useAuth();
-  const { isAdmin, loading } = useIsAdmin(user?.id);
-  if (loading) return <div className="h-32 animate-pulse rounded-2xl bg-muted" />;
+  const { user, loading: authLoading } = useAuth();
+  const { isAdmin, loading: roleLoading } = useIsAdmin(user?.id);
+  if (authLoading || roleLoading) {
+    return <div className="h-32 animate-pulse rounded-2xl bg-muted" />;
+  }
   if (!isAdmin) {
-    return (
-      <div className="rounded-2xl border bg-card p-8 text-center">
-        <h2 className="text-lg font-bold">Admins only</h2>
-        <p className="mt-1 text-sm text-muted-foreground">You don't have admin access.</p>
-        <Navigate to="/dashboard" />
-      </div>
-    );
+    return <Navigate to="/dashboard" />;
   }
   return (
     <div className="space-y-5">

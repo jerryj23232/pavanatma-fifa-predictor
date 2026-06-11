@@ -3,12 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function useIsAdmin(userId: string | undefined) {
   const [isAdmin, setIsAdmin] = useState(false);
+  // Stay in "loading" until we actually have a userId and have queried.
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     if (!userId) {
+      // Don't resolve yet — auth is still hydrating.
       setIsAdmin(false);
-      setLoading(false);
+      setLoading(true);
       return;
     }
     setLoading(true);
@@ -19,9 +22,13 @@ export function useIsAdmin(userId: string | undefined) {
       .eq("role", "admin")
       .maybeSingle()
       .then(({ data }) => {
+        if (cancelled) return;
         setIsAdmin(!!data);
         setLoading(false);
       });
+    return () => {
+      cancelled = true;
+    };
   }, [userId]);
 
   return { isAdmin, loading };
