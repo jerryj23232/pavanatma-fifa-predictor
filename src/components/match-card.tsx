@@ -190,6 +190,7 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
             >
               {prediction ? "Update" : "Predict"}
             </Button>
+            </div>
           </div>
         )}
       </div>
