@@ -31,8 +31,8 @@ function ProfilePage() {
     queryKey: ["lb-row", uid],
     enabled: !!uid,
     queryFn: async () => {
-      const { data } = await supabase.from("leaderboard").select("*").eq("user_id", uid!).maybeSingle();
-      return data;
+      const { data } = await supabase.rpc("get_leaderboard", { _limit: 1000 });
+      return data?.find((r) => r.user_id === uid) ?? null;
     },
   });
 

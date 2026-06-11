@@ -159,23 +159,24 @@ export type Database = {
       }
     }
     Views: {
-      leaderboard: {
-        Row: {
-          avatar_url: string | null
-          course: string | null
-          full_name: string | null
-          hits: number | null
-          predictions_made: number | null
-          total_points: number | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       calc_points: {
         Args: { _ah: number; _aw: number; _pa: number; _ph: number }
         Returns: number
+      }
+      get_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_url: string
+          course: string
+          full_name: string
+          hits: number
+          predictions_made: number
+          total_points: number
+          user_id: string
+        }[]
       }
       has_role: {
         Args: {
