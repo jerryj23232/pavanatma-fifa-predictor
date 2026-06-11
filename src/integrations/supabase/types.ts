@@ -27,6 +27,7 @@ export type Database = {
           home_team: string
           id: string
           kickoff_at: string
+          minute: number | null
           stage: string
           status: Database["public"]["Enums"]["match_status"]
           updated_at: string
@@ -45,6 +46,7 @@ export type Database = {
           home_team: string
           id?: string
           kickoff_at: string
+          minute?: number | null
           stage?: string
           status?: Database["public"]["Enums"]["match_status"]
           updated_at?: string
@@ -63,6 +65,7 @@ export type Database = {
           home_team?: string
           id?: string
           kickoff_at?: string
+          minute?: number | null
           stage?: string
           status?: Database["public"]["Enums"]["match_status"]
           updated_at?: string
