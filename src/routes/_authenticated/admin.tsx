@@ -1,6 +1,7 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useIsAdmin } from "@/hooks/use-is-admin";
@@ -12,7 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { flagFor } from "@/lib/flags";
-import { Trash2 } from "lucide-react";
+import { Trash2, RefreshCw } from "lucide-react";
+import { syncMatches } from "@/lib/sync-matches.functions";
+
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin — Pavanatma Predictor" }] }),
@@ -30,7 +33,10 @@ function AdminPage() {
   }
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-extrabold">Admin panel</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-extrabold">Admin panel</h1>
+        <SyncMatchesButton />
+      </div>
       <Tabs defaultValue="matches">
         <TabsList>
           <TabsTrigger value="matches">Matches</TabsTrigger>
@@ -42,6 +48,32 @@ function AdminPage() {
     </div>
   );
 }
+
+function SyncMatchesButton() {
+  const qc = useQueryClient();
+  const sync = useServerFn(syncMatches);
+  const m = useMutation({
+    mutationFn: async () => await sync(),
+    onSuccess: (r: { fetched: number; upserted: number }) => {
+      toast.success(`Synced ${r.upserted} of ${r.fetched} fixtures`);
+      qc.invalidateQueries({ queryKey: ["admin-matches"] });
+      qc.invalidateQueries({ queryKey: ["all-matches"] });
+      qc.invalidateQueries({ queryKey: ["upcoming-matches"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <Button
+      onClick={() => m.mutate()}
+      disabled={m.isPending}
+      className="bg-navy text-navy-foreground hover:bg-navy/90"
+    >
+      <RefreshCw className={`mr-2 h-4 w-4 ${m.isPending ? "animate-spin" : ""}`} />
+      {m.isPending ? "Syncing…" : "Sync Matches"}
+    </Button>
+  );
+}
+
 
 function AddMatch() {
   const qc = useQueryClient();

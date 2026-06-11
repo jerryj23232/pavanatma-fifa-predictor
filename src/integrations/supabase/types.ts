@@ -20,6 +20,7 @@ export type Database = {
           away_score: number | null
           away_team: string
           created_at: string
+          external_id: string | null
           group_name: string | null
           home_flag: string | null
           home_score: number | null
@@ -30,12 +31,14 @@ export type Database = {
           status: Database["public"]["Enums"]["match_status"]
           updated_at: string
           venue: string | null
+          winner: string | null
         }
         Insert: {
           away_flag?: string | null
           away_score?: number | null
           away_team: string
           created_at?: string
+          external_id?: string | null
           group_name?: string | null
           home_flag?: string | null
           home_score?: number | null
@@ -46,12 +49,14 @@ export type Database = {
           status?: Database["public"]["Enums"]["match_status"]
           updated_at?: string
           venue?: string | null
+          winner?: string | null
         }
         Update: {
           away_flag?: string | null
           away_score?: number | null
           away_team?: string
           created_at?: string
+          external_id?: string | null
           group_name?: string | null
           home_flag?: string | null
           home_score?: number | null
@@ -62,6 +67,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["match_status"]
           updated_at?: string
           venue?: string | null
+          winner?: string | null
         }
         Relationships: []
       }
