@@ -40,6 +40,14 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
   const [a, setA] = useState<number | "">(prediction?.predicted_away ?? "");
   const [now, setNow] = useState(() => Date.now());
 
+  // Sync inputs when a saved prediction loads/changes (e.g. after refresh).
+  useEffect(() => {
+    if (prediction) {
+      setH(prediction.predicted_home);
+      setA(prediction.predicted_away);
+    }
+  }, [prediction?.id, prediction?.predicted_home, prediction?.predicted_away]);
+
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 30_000);
     return () => clearInterval(t);
@@ -148,7 +156,13 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
             )}
           </div>
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="space-y-2">
+            {prediction && (
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald">
+                <Check className="h-3 w-3" /> Prediction submitted — you can edit until kickoff
+              </div>
+            )}
+            <div className="flex items-center gap-2">
             <Input
               type="number"
               min={0}
@@ -176,6 +190,7 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
             >
               {prediction ? "Update" : "Predict"}
             </Button>
+            </div>
           </div>
         )}
       </div>
