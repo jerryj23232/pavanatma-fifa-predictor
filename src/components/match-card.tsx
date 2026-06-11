@@ -23,6 +23,7 @@ export interface Match {
   status: "scheduled" | "live" | "completed";
   home_score: number | null;
   away_score: number | null;
+  minute?: number | null;
 }
 export interface Prediction {
   id: string;
