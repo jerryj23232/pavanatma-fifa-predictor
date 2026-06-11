@@ -1,0 +1,3 @@
+ALTER TABLE public.matches
+  ADD COLUMN IF NOT EXISTS external_id TEXT UNIQUE,
+  ADD COLUMN IF NOT EXISTS winner TEXT;
