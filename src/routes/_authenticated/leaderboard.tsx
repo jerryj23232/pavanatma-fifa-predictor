@@ -14,14 +14,9 @@ function LeaderboardPage() {
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["leaderboard"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("leaderboard")
-        .select("*")
-        .order("total_points", { ascending: false })
-        .order("hits", { ascending: false })
-        .limit(100);
+      const { data, error } = await supabase.rpc("get_leaderboard", { _limit: 100 });
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
   });
 
