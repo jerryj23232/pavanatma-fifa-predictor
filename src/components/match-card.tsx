@@ -81,21 +81,28 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
           <span className="rounded-full bg-emerald/10 px-2 py-0.5 text-emerald">{match.stage}</span>
           {match.group_name && <span>· Group {match.group_name}</span>}
         </div>
-        <span>
-          {locked
-            ? match.status === "completed"
-              ? "Full time"
-              : "Locked"
-            : formatDistanceToNowStrict(kickoff, { addSuffix: true })}
-        </span>
+        {match.status === "live" ? (
+          <span className="flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-destructive">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-destructive" />
+            LIVE{match.minute != null ? ` · ${match.minute}'` : ""}
+          </span>
+        ) : (
+          <span>
+            {locked
+              ? match.status === "completed"
+                ? "Full time"
+                : "Locked"
+              : formatDistanceToNowStrict(kickoff, { addSuffix: true })}
+          </span>
+        )}
       </div>
 
       <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
         <TeamSide name={match.home_team} flag={flagFor(match.home_team, match.home_flag)} align="left" />
         <div className="text-center">
-          {match.status === "completed" ? (
+          {match.status === "completed" || match.status === "live" ? (
             <div className="text-2xl font-extrabold">
-              {match.home_score} <span className="text-muted-foreground">–</span> {match.away_score}
+              {match.home_score ?? 0} <span className="text-muted-foreground">–</span> {match.away_score ?? 0}
             </div>
           ) : (
             <div className="text-xs font-semibold text-muted-foreground">
