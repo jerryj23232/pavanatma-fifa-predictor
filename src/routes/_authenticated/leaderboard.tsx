@@ -39,8 +39,16 @@ function LeaderboardPage() {
             {[top[1], top[0], top[2]].map((r, i) => {
               if (!r) return <div key={i} />;
               const rank = i === 1 ? 1 : i === 0 ? 2 : 3;
-              const colors = ["bg-gold text-gold-foreground", "bg-secondary", "bg-secondary"];
-              const heights = ["h-32 sm:h-40", "h-24 sm:h-32", "h-20 sm:h-28"];
+              const colors = {
+                1: "bg-gold text-gold-foreground",
+                2: "bg-secondary",
+                3: "bg-secondary",
+              } as const;
+              const heights = {
+                1: "h-36 sm:h-48",
+                2: "h-24 sm:h-32",
+                3: "h-16 sm:h-24",
+              } as const;
               return (
                 <div key={r.user_id} className="flex flex-col items-center">
                   <div className="mb-2 text-center">
@@ -48,7 +56,7 @@ function LeaderboardPage() {
                     <div className="line-clamp-1 max-w-[120px] text-sm font-bold">{r.full_name}</div>
                     <div className="text-lg font-extrabold text-emerald">{r.total_points}</div>
                   </div>
-                  <div className={`grid w-full place-items-center rounded-t-2xl ${heights[i]} ${colors[rank - 1]} shadow-card`}>
+                  <div className={`grid w-full place-items-center rounded-t-2xl ${heights[rank]} ${colors[rank]} shadow-card`}>
                     {rank === 1 ? <Trophy className="h-7 w-7" /> : <Medal className="h-6 w-6" />}
                   </div>
                 </div>
