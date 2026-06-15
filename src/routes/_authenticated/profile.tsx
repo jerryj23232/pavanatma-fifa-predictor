@@ -58,9 +58,29 @@ function ProfilePage() {
     queryKey: ["user-stats", uid],
     enabled: !!uid,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_user_stats" as never, { _user_id: uid } as never);
-      if (error) throw error;
-      return data as unknown as Stats;
+      const { data: row } = await supabase
+        .from("user_stats")
+        .select("*")
+        .eq("user_id", uid!)
+        .maybeSingle();
+      if (!row) return null;
+      const { count } = await supabase
+        .from("user_stats")
+        .select("user_id", { count: "exact", head: true })
+        .gt("total_points", row.total_points);
+      return {
+        total_points: row.total_points,
+        total_predictions: row.predictions_count,
+        completed_predictions: row.completed_predictions,
+        exact_scores: row.exact_scores,
+        correct_winners: row.correct_winners,
+        accuracy: Number(row.accuracy_percentage),
+        best_matchday: row.best_matchday_score,
+        current_streak: row.current_streak,
+        longest_streak: row.longest_streak,
+        rank: (count ?? 0) + 1,
+        avg_points: Number(row.average_points_per_match),
+      } as Stats;
     },
   });
 
@@ -127,7 +147,7 @@ function ProfilePage() {
   );
 }
 
-function StatisticsSection({ stats, loading }: { stats: Stats | undefined; loading: boolean }) {
+function StatisticsSection({ stats, loading }: { stats: Stats | null | undefined; loading: boolean }) {
   if (loading) {
     return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
