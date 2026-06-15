@@ -147,7 +147,7 @@ function ProfilePage() {
   );
 }
 
-function StatisticsSection({ stats, loading }: { stats: Stats | undefined; loading: boolean }) {
+function StatisticsSection({ stats, loading }: { stats: Stats | null | undefined; loading: boolean }) {
   if (loading) {
     return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
