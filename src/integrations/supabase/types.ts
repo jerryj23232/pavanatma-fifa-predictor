@@ -166,6 +166,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_stats: {
+        Row: {
+          accuracy_percentage: number
+          average_points_per_match: number
+          best_matchday_score: number
+          completed_predictions: number
+          correct_winners: number
+          current_streak: number
+          exact_scores: number
+          longest_streak: number
+          predictions_count: number
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accuracy_percentage?: number
+          average_points_per_match?: number
+          best_matchday_score?: number
+          completed_predictions?: number
+          correct_winners?: number
+          current_streak?: number
+          exact_scores?: number
+          longest_streak?: number
+          predictions_count?: number
+          total_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accuracy_percentage?: number
+          average_points_per_match?: number
+          best_matchday_score?: number
+          completed_predictions?: number
+          correct_winners?: number
+          current_streak?: number
+          exact_scores?: number
+          longest_streak?: number
+          predictions_count?: number
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -195,6 +240,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      recalc_user_stats: { Args: { _user_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user"
