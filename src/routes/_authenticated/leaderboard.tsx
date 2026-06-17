@@ -3,11 +3,25 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Trophy, Medal } from "lucide-react";
+import { BadgesRow, RankMovement, type Badge } from "@/components/badges-row";
 
 export const Route = createFileRoute("/_authenticated/leaderboard")({
   head: () => ({ meta: [{ title: "Leaderboard — Pavanatma Predictor" }] }),
   component: LeaderboardPage,
 });
+
+type Row = {
+  user_id: string;
+  full_name: string | null;
+  course: string | null;
+  avatar_url: string | null;
+  total_points: number;
+  hits: number;
+  predictions_made: number;
+  current_rank: number | null;
+  previous_rank: number | null;
+  badges: Badge[] | null;
+};
 
 function LeaderboardPage() {
   const { user } = useAuth();
@@ -16,7 +30,7 @@ function LeaderboardPage() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_leaderboard", { _limit: 100 });
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as unknown as Row[];
     },
   });
 
@@ -52,9 +66,17 @@ function LeaderboardPage() {
               return (
                 <div key={r.user_id} className="flex flex-col items-center">
                   <div className="mb-2 text-center">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">#{rank}</div>
+                    <div className="flex items-center justify-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <span>#{rank}</span>
+                      <RankMovement current={r.current_rank} previous={r.previous_rank} />
+                    </div>
                     <div className="line-clamp-1 max-w-[120px] text-sm font-bold">{r.full_name}</div>
                     <div className="text-lg font-extrabold text-emerald">{r.total_points}</div>
+                    {r.badges && r.badges.length > 0 && (
+                      <div className="mt-1 flex justify-center">
+                        <BadgesRow badges={r.badges} size="md" max={4} />
+                      </div>
+                    )}
                   </div>
                   <div className={`grid w-full place-items-center rounded-t-2xl ${heights[rank]} ${colors[rank]} shadow-card`}>
                     {rank === 1 ? <Trophy className="h-7 w-7" /> : <Medal className="h-6 w-6" />}
@@ -75,9 +97,15 @@ function LeaderboardPage() {
                   className={`flex items-center justify-between gap-3 px-4 py-3 ${idx !== rest.length - 1 ? "border-b" : ""} ${isMe ? "bg-emerald/5" : ""}`}
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <span className="w-6 text-right text-sm font-bold tabular-nums text-muted-foreground">{rank}</span>
+                    <div className="flex w-12 flex-col items-end leading-tight">
+                      <span className="text-sm font-bold tabular-nums text-muted-foreground">{rank}</span>
+                      <RankMovement current={r.current_rank} previous={r.previous_rank} />
+                    </div>
                     <div className="min-w-0">
-                      <div className="truncate text-sm font-semibold">{r.full_name} {isMe && <span className="text-xs text-emerald">(you)</span>}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="truncate text-sm font-semibold">{r.full_name} {isMe && <span className="text-xs text-emerald">(you)</span>}</div>
+                        {r.badges && r.badges.length > 0 && <BadgesRow badges={r.badges} size="sm" max={3} />}
+                      </div>
                       {r.course && <div className="truncate text-xs text-muted-foreground">{r.course}</div>}
                     </div>
                   </div>

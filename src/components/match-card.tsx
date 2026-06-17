@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Lock, Check } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNowStrict, format } from "date-fns";
+import { MatchTrends } from "@/components/match-trends";
 
 export interface Match {
   id: string;
@@ -194,6 +195,12 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
           </div>
         )}
       </div>
+
+      {match.status !== "completed" && (
+        <div className="mt-3">
+          <MatchTrends matchId={match.id} homeTeam={match.home_team} awayTeam={match.away_team} />
+        </div>
+      )}
     </div>
   );
 }
