@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          code: Database["public"]["Enums"]["achievement_code"]
+          description: string
+          emoji: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          code: Database["public"]["Enums"]["achievement_code"]
+          description: string
+          emoji: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          code?: Database["public"]["Enums"]["achievement_code"]
+          description?: string
+          emoji?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           away_flag: string | null
@@ -145,6 +169,32 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          code: Database["public"]["Enums"]["achievement_code"]
+          earned_at: string
+          user_id: string
+        }
+        Insert: {
+          code: Database["public"]["Enums"]["achievement_code"]
+          earned_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: Database["public"]["Enums"]["achievement_code"]
+          earned_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_code_fkey"
+            columns: ["code"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -173,10 +223,13 @@ export type Database = {
           best_matchday_score: number
           completed_predictions: number
           correct_winners: number
+          current_rank: number | null
           current_streak: number
           exact_scores: number
           longest_streak: number
           predictions_count: number
+          previous_rank: number | null
+          rank_snapshot_at: string | null
           total_points: number
           updated_at: string
           user_id: string
@@ -187,10 +240,13 @@ export type Database = {
           best_matchday_score?: number
           completed_predictions?: number
           correct_winners?: number
+          current_rank?: number | null
           current_streak?: number
           exact_scores?: number
           longest_streak?: number
           predictions_count?: number
+          previous_rank?: number | null
+          rank_snapshot_at?: string | null
           total_points?: number
           updated_at?: string
           user_id: string
@@ -201,10 +257,13 @@ export type Database = {
           best_matchday_score?: number
           completed_predictions?: number
           correct_winners?: number
+          current_rank?: number | null
           current_streak?: number
           exact_scores?: number
           longest_streak?: number
           predictions_count?: number
+          previous_rank?: number | null
+          rank_snapshot_at?: string | null
           total_points?: number
           updated_at?: string
           user_id?: string
@@ -224,13 +283,20 @@ export type Database = {
         Args: { _limit?: number }
         Returns: {
           avatar_url: string
+          badges: Json
           course: string
+          current_rank: number
           full_name: string
           hits: number
           predictions_made: number
+          previous_rank: number
           total_points: number
           user_id: string
         }[]
+      }
+      get_match_trends: {
+        Args: { _match_id: string; _min_predictions?: number }
+        Returns: Json
       }
       get_user_stats: { Args: { _user_id: string }; Returns: Json }
       has_role: {
@@ -241,8 +307,17 @@ export type Database = {
         Returns: boolean
       }
       recalc_user_stats: { Args: { _user_id: string }; Returns: undefined }
+      snapshot_leaderboard_ranks: { Args: never; Returns: undefined }
     }
     Enums: {
+      achievement_code:
+        | "first_exact"
+        | "streak_5"
+        | "winners_10"
+        | "points_100"
+        | "veteran_50"
+        | "top_3"
+        | "league_leader"
       app_role: "admin" | "user"
       match_status: "scheduled" | "live" | "completed"
     }
@@ -372,6 +447,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      achievement_code: [
+        "first_exact",
+        "streak_5",
+        "winners_10",
+        "points_100",
+        "veteran_50",
+        "top_3",
+        "league_leader",
+      ],
       app_role: ["admin", "user"],
       match_status: ["scheduled", "live", "completed"],
     },
