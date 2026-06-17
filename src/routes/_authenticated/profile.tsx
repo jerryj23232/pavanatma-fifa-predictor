@@ -362,3 +362,63 @@ function Legend({ color, label }: { color: string; label: string }) {
     </div>
   );
 }
+
+function AchievementsSection({ uid }: { uid: string | undefined }) {
+  const { data: earned = [] } = useQuery({
+    queryKey: ["user-achievements", uid],
+    enabled: !!uid,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_achievements" as never)
+        .select("code, earned_at")
+        .eq("user_id", uid!);
+      if (error) throw error;
+      return (data ?? []) as unknown as { code: string; earned_at: string }[];
+    },
+  });
+
+  const { data: catalog = [] } = useQuery({
+    queryKey: ["achievements-catalog"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("achievements" as never)
+        .select("*")
+        .order("sort_order");
+      if (error) throw error;
+      return (data ?? []) as unknown as Badge[] & { sort_order: number }[];
+    },
+  });
+
+  const earnedSet = new Set(earned.map((e) => e.code));
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-baseline justify-between">
+        <h2 className="text-lg font-bold flex items-center gap-2"><Medal className="h-4 w-4 text-gold" /> Achievements</h2>
+        <span className="text-xs text-muted-foreground">{earnedSet.size} / {catalog.length}</span>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {(catalog as unknown as Badge[]).map((b) => {
+          const got = earnedSet.has(b.code);
+          return (
+            <div
+              key={b.code}
+              className={`flex items-center gap-3 rounded-2xl border p-3 shadow-card transition ${
+                got ? "bg-card-grad" : "bg-muted/30 opacity-60"
+              }`}
+            >
+              <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-full text-2xl ${got ? "bg-gold/20" : "bg-muted grayscale"}`}>
+                {b.emoji}
+              </div>
+              <div className="min-w-0">
+                <div className="truncate text-sm font-bold">{b.name}</div>
+                <div className="truncate text-xs text-muted-foreground">{b.description}</div>
+              </div>
+              {got && <CheckCircle2 className="ml-auto h-4 w-4 shrink-0 text-emerald" />}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
