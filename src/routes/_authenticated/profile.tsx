@@ -20,7 +20,9 @@ import {
   Award,
   BarChart3,
   Sparkles,
+  Medal,
 } from "lucide-react";
+import type { Badge } from "@/components/badges-row";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({ meta: [{ title: "Profile — Pavanatma Predictor" }] }),
@@ -114,6 +116,8 @@ function ProfilePage() {
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-extrabold">Your profile</h1>
+
+      <AchievementsSection uid={uid} />
 
       <StatisticsSection stats={stats} loading={statsLoading} />
 
