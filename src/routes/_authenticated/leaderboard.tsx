@@ -192,6 +192,21 @@ function LeaderboardPage() {
           </div>
         </>
       )}
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <PeriodLeaderboard
+          title="Weekly Leaderboard"
+          icon="🏆"
+          period="week"
+          emptyText="No points scored this week yet."
+        />
+        <PeriodLeaderboard
+          title="Daily Leaderboard"
+          icon="⚡"
+          period="day"
+          emptyText="No points scored today yet."
+        />
+      </div>
     </div>
   );
 }
