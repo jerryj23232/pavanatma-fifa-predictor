@@ -5,6 +5,76 @@ import { useAuth } from "@/hooks/use-auth";
 import { Trophy, Medal } from "lucide-react";
 import { BadgesRow, RankMovement, type Badge } from "@/components/badges-row";
 
+type PeriodRow = {
+  user_id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  total_points: number;
+};
+
+function PeriodLeaderboard({
+  title,
+  icon,
+  period,
+  emptyText,
+}: {
+  title: string;
+  icon: string;
+  period: "day" | "week";
+  emptyText: string;
+}) {
+  const { user } = useAuth();
+  const { data: rows = [], isLoading } = useQuery({
+    queryKey: ["period-leaderboard", period],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_period_leaderboard", {
+        _period: period,
+        _limit: 3,
+      });
+      if (error) throw error;
+      return (data ?? []) as PeriodRow[];
+    },
+  });
+
+  return (
+    <div className="rounded-2xl border bg-card p-4 shadow-card">
+      <div className="mb-3 flex items-center gap-2">
+        <span className="text-lg" aria-hidden>{icon}</span>
+        <h2 className="text-sm font-bold uppercase tracking-wide">{title}</h2>
+      </div>
+      {isLoading ? (
+        <div className="h-24 animate-pulse rounded-xl bg-muted" />
+      ) : rows.length === 0 ? (
+        <div className="py-6 text-center text-xs text-muted-foreground">{emptyText}</div>
+      ) : (
+        <ol className="space-y-1.5">
+          {rows.map((r, i) => {
+            const isMe = r.user_id === user?.id;
+            return (
+              <li
+                key={r.user_id}
+                className={`flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm ${isMe ? "bg-emerald/10 ring-1 ring-emerald/30" : ""}`}
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="w-5 shrink-0 text-xs font-bold tabular-nums text-muted-foreground">#{i + 1}</span>
+                  <span className="truncate font-semibold">
+                    {r.full_name ?? "Player"}
+                    {isMe && <span className="ml-1 text-xs text-emerald">(you)</span>}
+                  </span>
+                </div>
+                <span className="shrink-0 text-sm font-extrabold tabular-nums text-emerald">
+                  {r.total_points} <span className="text-xs font-medium text-muted-foreground">pts</span>
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+
 export const Route = createFileRoute("/_authenticated/leaderboard")({
   head: () => ({ meta: [{ title: "Leaderboard — Pavanatma Predictor" }] }),
   component: LeaderboardPage,
