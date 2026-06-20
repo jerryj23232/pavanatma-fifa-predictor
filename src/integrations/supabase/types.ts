@@ -298,6 +298,15 @@ export type Database = {
         Args: { _match_id: string; _min_predictions?: number }
         Returns: Json
       }
+      get_period_leaderboard: {
+        Args: { _limit?: number; _period: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          total_points: number
+          user_id: string
+        }[]
+      }
       get_user_stats: { Args: { _user_id: string }; Returns: Json }
       has_role: {
         Args: {
