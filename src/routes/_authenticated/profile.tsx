@@ -42,14 +42,7 @@ function ProfilePage() {
   const { user } = useAuth();
   const uid = user?.id;
 
-  const { data: profile, refetch } = useQuery({
-    queryKey: ["profile", uid],
-    enabled: !!uid,
-    queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("*").eq("id", uid!).maybeSingle();
-      return data;
-    },
-  });
+
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["user-stats", uid],
