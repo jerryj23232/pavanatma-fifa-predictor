@@ -81,33 +81,6 @@ function ProfilePage() {
     },
   });
 
-  const [fullName, setFullName] = useState("");
-  const [course, setCourse] = useState("");
-  const [year, setYear] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (profile) {
-      setFullName(profile.full_name ?? "");
-      setCourse(profile.course ?? "");
-      setYear(profile.year ?? "");
-    }
-  }, [profile]);
-
-  const save = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!uid) return;
-    setSaving(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ full_name: fullName, course, year })
-      .eq("id", uid);
-    setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Profile updated");
-    refetch();
-  };
-
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-extrabold">Your profile</h1>
@@ -115,33 +88,6 @@ function ProfilePage() {
       <AchievementsSection uid={uid} />
 
       <StatisticsSection stats={stats} loading={statsLoading} />
-
-      <form onSubmit={save} className="rounded-2xl border bg-card p-5 shadow-card">
-        <h2 className="mb-4 text-lg font-bold">Account</h2>
-        <div className="space-y-4">
-          <div>
-            <Label>Email</Label>
-            <Input value={user?.email ?? ""} disabled />
-          </div>
-          <div>
-            <Label htmlFor="n">Full name</Label>
-            <Input id="n" value={fullName} onChange={(e) => setFullName(e.target.value)} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label htmlFor="c">Course</Label>
-              <Input id="c" value={course} onChange={(e) => setCourse(e.target.value)} placeholder="BCom" />
-            </div>
-            <div>
-              <Label htmlFor="y">Year</Label>
-              <Input id="y" value={year} onChange={(e) => setYear(e.target.value)} placeholder="2nd" />
-            </div>
-          </div>
-          <Button disabled={saving} className="bg-emerald text-emerald-foreground hover:bg-emerald/90">
-            {saving ? "Saving…" : "Save changes"}
-          </Button>
-        </div>
-      </form>
     </div>
   );
 }
