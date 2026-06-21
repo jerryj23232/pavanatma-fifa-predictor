@@ -317,6 +317,7 @@ export type Database = {
       }
       recalc_user_stats: { Args: { _user_id: string }; Returns: undefined }
       snapshot_leaderboard_ranks: { Args: never; Returns: undefined }
+      verify_sync_webhook: { Args: { _token: string }; Returns: boolean }
     }
     Enums: {
       achievement_code:
