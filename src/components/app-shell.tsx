@@ -1,15 +1,40 @@
 import { Link, useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Trophy, CalendarDays, User as UserIcon, Shield, LogOut, LayoutDashboard } from "lucide-react";
+import { Trophy, CalendarDays, User as UserIcon, Shield, LogOut, LayoutDashboard, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { ReactNode } from "react";
+
+function initialsOf(name: string | null | undefined, email: string | null | undefined) {
+  const src = (name || email || "").trim();
+  if (!src) return "?";
+  const parts = src.split(/[\s@._-]+/).filter(Boolean);
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || src[0].toUpperCase();
+}
 
 export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { user } = useAuth();
   const { isAdmin } = useIsAdmin(user?.id);
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("full_name, avatar_url").eq("id", user!.id).maybeSingle();
+      return data;
+    },
+  });
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -23,6 +48,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/profile", label: "Profile", icon: UserIcon },
     ...(isAdmin ? [{ to: "/admin", label: "Admin", icon: Shield }] : []),
   ] as const;
+
+  const initials = initialsOf(profile?.full_name, user?.email);
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
@@ -52,10 +79,40 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
-          <Button variant="ghost" size="sm" onClick={signOut} className="gap-1">
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Sign out</span>
-          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              aria-label="Open account menu"
+              className="rounded-full ring-offset-background transition focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald focus-visible:ring-offset-2"
+            >
+              <Avatar className="h-9 w-9 border border-border">
+                {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.full_name ?? "Profile"} />}
+                <AvatarFallback className="bg-hero text-xs font-bold text-navy-foreground">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col">
+                  <span className="truncate text-sm font-semibold">{profile?.full_name ?? "Player"}</span>
+                  <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/account" className="cursor-pointer">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Account settings
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={signOut} className="cursor-pointer text-destructive focus:text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
