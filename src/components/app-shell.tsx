@@ -54,16 +54,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
       {/* Top bar */}
-      <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-border glass">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-          <Link to="/dashboard" className="flex min-w-0 items-center gap-2">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-hero text-navy-foreground shadow-glow">
-              <Trophy className="h-4 w-4 text-gold" />
+          <Link to="/dashboard" className="flex min-w-0 items-center gap-2.5">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-neon-grad text-neon-foreground shadow-glow">
+              <Trophy className="h-5 w-5" strokeWidth={2.5} />
             </div>
             <div className="min-w-0 leading-tight">
-              <div className="truncate text-sm font-bold">Pavanatma Predictor</div>
-              <div className="truncate text-[10px] uppercase tracking-wider text-muted-foreground">
-                Pavanatma College, Murickassery
+              <div className="truncate text-sm font-extrabold tracking-tight">Pavanatma Predictor</div>
+              <div className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Pavanatma College · Murickassery
               </div>
             </div>
           </Link>
@@ -72,8 +72,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={n.to}
                 to={n.to}
-                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-                activeProps={{ className: "bg-secondary text-foreground" }}
+                className="rounded-lg px-3 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                activeProps={{ className: "bg-secondary text-neon" }}
               >
                 {n.label}
               </Link>
@@ -83,11 +83,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label="Open account menu"
-              className="rounded-full ring-offset-background transition focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald focus-visible:ring-offset-2"
+              className="rounded-full ring-offset-background transition focus:outline-none focus-visible:ring-2 focus-visible:ring-neon focus-visible:ring-offset-2"
             >
-              <Avatar className="h-9 w-9 border border-border">
+              <Avatar className="h-9 w-9 border border-border ring-1 ring-neon/30">
                 {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.full_name ?? "Profile"} />}
-                <AvatarFallback className="bg-hero text-xs font-bold text-navy-foreground">
+                <AvatarFallback className="bg-neon-grad text-xs font-bold text-neon-foreground">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -119,7 +119,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 backdrop-blur md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border glass md:hidden">
         <div className="mx-auto grid max-w-6xl grid-cols-5">
           {nav.map((n) => {
             const Icon = n.icon;
@@ -127,11 +127,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={n.to}
                 to={n.to}
-                className="flex flex-col items-center gap-1 px-1 py-2.5 text-[10px] font-medium text-muted-foreground"
-                activeProps={{ className: "text-emerald" }}
+                className="relative flex flex-col items-center gap-1 px-1 py-2.5 text-[10px] font-semibold text-muted-foreground transition"
+                activeProps={{ className: "text-neon [&>span.dot]:opacity-100" }}
               >
                 <Icon className="h-5 w-5" />
                 <span className="truncate">{n.label}</span>
+                <span className="dot pointer-events-none absolute -top-px left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-neon opacity-0 shadow-glow transition" />
               </Link>
             );
           })}
