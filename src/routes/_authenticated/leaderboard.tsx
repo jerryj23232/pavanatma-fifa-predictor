@@ -124,32 +124,32 @@ function LeaderboardPage() {
               if (!r) return <div key={i} />;
               const rank = i === 1 ? 1 : i === 0 ? 2 : 3;
               const colors = {
-                1: "bg-gold text-gold-foreground",
-                2: "bg-secondary",
-                3: "bg-secondary",
+                1: "bg-gold text-gold-foreground shadow-glow",
+                2: "bg-silver text-silver-foreground",
+                3: "bg-bronze text-bronze-foreground",
               } as const;
               const heights = {
-                1: "h-36 sm:h-48",
-                2: "h-24 sm:h-32",
-                3: "h-16 sm:h-24",
+                1: "h-40 sm:h-52",
+                2: "h-28 sm:h-36",
+                3: "h-20 sm:h-28",
               } as const;
               return (
                 <div key={r.user_id} className="flex flex-col items-center">
                   <div className="mb-2 text-center">
-                    <div className="flex items-center justify-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <div className="flex items-center justify-center gap-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       <span>#{rank}</span>
                       <RankMovement current={r.current_rank} previous={r.previous_rank} />
                     </div>
                     <div className="line-clamp-1 max-w-[120px] text-sm font-bold">{r.full_name}</div>
-                    <div className="text-lg font-extrabold text-emerald">{r.total_points}</div>
+                    <div className={`text-lg font-extrabold ${rank === 1 ? "text-neon text-glow-neon" : "text-neon"}`}>{r.total_points}</div>
                     {r.badges && r.badges.length > 0 && (
                       <div className="mt-1 flex justify-center">
                         <BadgesRow badges={r.badges} size="md" max={4} />
                       </div>
                     )}
                   </div>
-                  <div className={`grid w-full place-items-center rounded-t-2xl ${heights[rank]} ${colors[rank]} shadow-card`}>
-                    {rank === 1 ? <Trophy className="h-7 w-7" /> : <Medal className="h-6 w-6" />}
+                  <div className={`grid w-full place-items-center rounded-t-2xl ${heights[rank]} ${colors[rank]}`}>
+                    {rank === 1 ? <Trophy className="h-7 w-7" strokeWidth={2.5} /> : <Medal className="h-6 w-6" strokeWidth={2.5} />}
                   </div>
                 </div>
               );
