@@ -45,13 +45,14 @@ export function AppShell({ children }: { children: ReactNode }) {
     router.navigate({ to: "/auth", replace: true });
   };
 
-  const nav = [
+  type NavItem = { to: string; label: string; img?: string; scale?: number; icon?: typeof Shield };
+  const nav: NavItem[] = [
     { to: "/dashboard", label: "Dashboard", img: navDashboard.url, scale: 1.2 },
     { to: "/matches", label: "Matches", img: navMatches.url, scale: 1.2 },
     { to: "/leaderboard", label: "Leaderboard", img: navLeaderboard.url, scale: 1.15 },
     { to: "/profile", label: "Profile", img: navProfile.url, scale: 1.0 },
-    ...(isAdmin ? [{ to: "/admin", label: "Admin", icon: Shield as const }] : []),
-  ] as Array<{ to: string; label: string; img?: string; scale?: number; icon?: typeof Shield }>;
+    ...(isAdmin ? [{ to: "/admin", label: "Admin", icon: Shield }] : []),
+  ];
 
   const initials = initialsOf(profile?.full_name, user?.email);
 
