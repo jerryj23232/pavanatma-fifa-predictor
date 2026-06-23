@@ -1,7 +1,11 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Trophy, CalendarDays, User as UserIcon, Shield, LogOut, LayoutDashboard, Settings } from "lucide-react";
+import { Trophy, Shield, LogOut, Settings } from "lucide-react";
+import navDashboard from "@/assets/nav/dashboard.png.asset.json";
+import navMatches from "@/assets/nav/matches.png.asset.json";
+import navLeaderboard from "@/assets/nav/leaderboard.png.asset.json";
+import navProfile from "@/assets/nav/profile.png.asset.json";
 import { useAuth } from "@/hooks/use-auth";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -41,13 +45,14 @@ export function AppShell({ children }: { children: ReactNode }) {
     router.navigate({ to: "/auth", replace: true });
   };
 
-  const nav = [
-    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/matches", label: "Matches", icon: CalendarDays },
-    { to: "/leaderboard", label: "Leaderboard", icon: Trophy },
-    { to: "/profile", label: "Profile", icon: UserIcon },
+  type NavItem = { to: string; label: string; img?: string; scale?: number; icon?: typeof Shield };
+  const nav: NavItem[] = [
+    { to: "/dashboard", label: "Dashboard", img: navDashboard.url, scale: 1.2 },
+    { to: "/matches", label: "Matches", img: navMatches.url, scale: 1.2 },
+    { to: "/leaderboard", label: "Leaderboard", img: navLeaderboard.url, scale: 1.15 },
+    { to: "/profile", label: "Profile", img: navProfile.url, scale: 1.0 },
     ...(isAdmin ? [{ to: "/admin", label: "Admin", icon: Shield }] : []),
-  ] as const;
+  ];
 
   const initials = initialsOf(profile?.full_name, user?.email);
 
@@ -130,7 +135,19 @@ export function AppShell({ children }: { children: ReactNode }) {
                 className="relative flex flex-col items-center gap-1 px-1 py-2.5 text-[10px] font-semibold text-muted-foreground transition"
                 activeProps={{ className: "text-neon [&>span.dot]:opacity-100" }}
               >
-                <Icon className="h-5 w-5" />
+                <span className="flex h-6 w-6 items-center justify-center">
+                  {n.img ? (
+                    <img
+                      src={n.img}
+                      alt=""
+                      aria-hidden
+                      className="h-full w-full object-contain"
+                      style={{ transform: `scale(${n.scale ?? 1})` }}
+                    />
+                  ) : Icon ? (
+                    <Icon className="h-5 w-5" />
+                  ) : null}
+                </span>
                 <span className="truncate">{n.label}</span>
                 <span className="dot pointer-events-none absolute -top-px left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-neon opacity-0 shadow-glow transition" />
               </Link>
