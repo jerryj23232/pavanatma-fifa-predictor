@@ -1,7 +1,11 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Trophy, CalendarDays, User as UserIcon, Shield, LogOut, LayoutDashboard, Settings } from "lucide-react";
+import { Trophy, Shield, LogOut, Settings } from "lucide-react";
+import navDashboard from "@/assets/nav/dashboard.png.asset.json";
+import navMatches from "@/assets/nav/matches.png.asset.json";
+import navLeaderboard from "@/assets/nav/leaderboard.png.asset.json";
+import navProfile from "@/assets/nav/profile.png.asset.json";
 import { useAuth } from "@/hooks/use-auth";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
