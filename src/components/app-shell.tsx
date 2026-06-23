@@ -135,7 +135,19 @@ export function AppShell({ children }: { children: ReactNode }) {
                 className="relative flex flex-col items-center gap-1 px-1 py-2.5 text-[10px] font-semibold text-muted-foreground transition"
                 activeProps={{ className: "text-neon [&>span.dot]:opacity-100" }}
               >
-                <Icon className="h-5 w-5" />
+                <span className="flex h-6 w-6 items-center justify-center">
+                  {n.img ? (
+                    <img
+                      src={n.img}
+                      alt=""
+                      aria-hidden
+                      className="h-full w-full object-contain"
+                      style={{ transform: `scale(${n.scale ?? 1})` }}
+                    />
+                  ) : Icon ? (
+                    <Icon className="h-5 w-5" />
+                  ) : null}
+                </span>
                 <span className="truncate">{n.label}</span>
                 <span className="dot pointer-events-none absolute -top-px left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-neon opacity-0 shadow-glow transition" />
               </Link>
