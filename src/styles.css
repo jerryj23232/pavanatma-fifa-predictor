@@ -1,3 +1,5 @@
+@import "@fontsource/iceberg";
+@import "@fontsource/geist";
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -44,8 +46,8 @@
   --color-navy-foreground: var(--foreground);
   --color-warning: var(--warning);
   --color-success: var(--success);
-  --font-display: "Space Grotesk", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  --font-display: "Iceberg", system-ui, sans-serif;
+  --font-body: "Geist", system-ui, sans-serif;
 }
 
 /* Dark by default — premium sports-tech identity */

@@ -7,6 +7,7 @@ import { MatchCard } from "@/components/match-card";
 import { flagFor } from "@/lib/flags";
 import { Trophy, Target, CheckCircle2, Clock, Radio, CalendarDays, Flag } from "lucide-react";
 import { format, formatDistanceToNowStrict } from "date-fns";
+import fifa2026 from "@/assets/fifa2026.png";
 
 // Predictions open this many hours before kickoff.
 const PREDICTION_WINDOW_HOURS = 72;
