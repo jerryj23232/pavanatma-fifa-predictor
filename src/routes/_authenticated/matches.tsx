@@ -65,7 +65,7 @@ function MatchesPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-extrabold">Matches</h1>
+        <h1 className="text-2xl font-display font-normal uppercase tracking-[0.12em]">MATCHES</h1>
         <p className="text-sm text-muted-foreground">
           Predictions open {PREDICTION_WINDOW_HOURS}h before kickoff.
         </p>

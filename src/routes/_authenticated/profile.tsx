@@ -76,7 +76,7 @@ function ProfilePage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-extrabold">Your profile</h1>
+      <h1 className="font-display text-2xl font-normal uppercase tracking-[0.12em]">YOUR PROFILE</h1>
 
       <AchievementsSection uid={uid} />
 
@@ -120,7 +120,7 @@ function StatisticsSection({ stats, loading }: { stats: Stats | null | undefined
     <div className="space-y-6">
       {/* Statistics */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold">Statistics</h2>
+        <h2 className="font-display text-lg font-normal uppercase tracking-[0.12em]">STATISTICS</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             icon={Trophy}
@@ -151,7 +151,7 @@ function StatisticsSection({ stats, loading }: { stats: Stats | null | undefined
 
       {/* Performance */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold">Performance</h2>
+        <h2 className="font-display text-lg font-normal uppercase tracking-[0.12em]">PERFORMANCE</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             icon={Crosshair}
@@ -184,7 +184,7 @@ function StatisticsSection({ stats, loading }: { stats: Stats | null | undefined
 
       {/* Advanced Analytics */}
       <section className="space-y-3">
-        <h2 className="text-lg font-bold">Advanced Analytics</h2>
+        <h2 className="font-display text-lg font-normal uppercase tracking-[0.12em]">ADVANCED ANALYTICS</h2>
         <div className="grid gap-3 md:grid-cols-2">
           <div className="rounded-2xl border bg-card-grad p-5 shadow-card">
             <div className="flex items-center justify-between">
@@ -328,7 +328,8 @@ function AchievementsSection({ uid }: { uid: string | undefined }) {
   return (
     <section className="space-y-3">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-lg font-bold flex items-center gap-2"><Medal className="h-4 w-4 text-gold" /> Achievements</h2>
+        <h2 className="flex items-center gap-2 font-display text-lg font-normal uppercase tracking-[0.12em]">
+  <Medal className="h-4 w-4 text-gold" />ACHIEVEMENTS</h2>
         <span className="text-xs text-muted-foreground">{earnedSet.size} / {catalog.length}</span>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

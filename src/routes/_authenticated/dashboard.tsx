@@ -204,7 +204,7 @@ function Section({
     <section>
       <div className="mb-3 flex items-end justify-between gap-3">
         <div>
-          <h2 className="flex items-center gap-2 text-lg font-bold">
+          <h2 className="flex items-center gap-2 text-lg font-display font-normal uppercase tracking-[0.12em]">
             <Icon className={`h-4 w-4 ${accent}`} /> {title}
             <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
               {count}

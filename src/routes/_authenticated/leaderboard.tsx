@@ -110,7 +110,7 @@ function LeaderboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold">Campus Leaderboard</h1>
+        <h1 className="text-2xl font-display font-normal uppercase tracking-[0.12em]">LEADERBOARD</h1>
         <p className="text-sm text-muted-foreground">3 points exact score · 1 point correct result</p>
       </div>
 
