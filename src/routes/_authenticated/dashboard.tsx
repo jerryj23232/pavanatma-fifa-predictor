@@ -8,6 +8,7 @@ import { flagFor } from "@/lib/flags";
 import { Trophy, Target, CheckCircle2, Clock, Radio, CalendarDays, Flag } from "lucide-react";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import fifa2026 from "@/assets/fifa2026.png";
+import  DashboardHero  from "@/components/dashboard-hero";
 
 // Predictions open this many hours before kickoff.
 const PREDICTION_WINDOW_HOURS = 72;
@@ -95,17 +96,12 @@ function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Hero greeting */}
-      <div className="rounded-3xl bg-hero p-5 text-navy-foreground shadow-glow sm:p-7">
-        <div className="text-xs font-semibold uppercase tracking-wider text-gold">Welcome back</div>
-        <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl">{profile?.full_name || "Student"}</h1>
-        <p className="mt-1 text-sm text-white/75">Predict the next match before kickoff.</p>
-        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-4">
-          <Stat icon={Trophy} label="Points" value={points} />
-          <Stat icon={Target} label="Made" value={made} />
-          <Stat icon={CheckCircle2} label="Hits" value={hits} />
-        </div>
-      </div>
+   <DashboardHero
+  fullName={profile?.full_name || "Student"}
+  points={points}
+  made={made}
+  hits={hits}
+/>
 
       {/* 1. Active predictions */}
       <Section

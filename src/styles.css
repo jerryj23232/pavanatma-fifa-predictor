@@ -163,3 +163,10 @@
 @utility text-glow-neon {
   text-shadow: 0 0 12px oklch(0.91 0.30 142 / 0.55);
 }
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
