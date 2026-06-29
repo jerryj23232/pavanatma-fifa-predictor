@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { ReactNode } from "react";
+import headerImage from "@/assets/nav/header.png";
 
 function initialsOf(name: string | null | undefined, email: string | null | undefined) {
   const src = (name || email || "").trim();
@@ -61,17 +62,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Top bar */}
       <header className="sticky top-0 z-30 border-b border-border glass">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-          <Link to="/dashboard" className="flex min-w-0 items-center gap-2.5">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-neon-grad text-neon-foreground shadow-glow">
-              <Trophy className="h-5 w-5" strokeWidth={2.5} />
-            </div>
-            <div className="min-w-0 leading-tight">
-              <div className="truncate text-sm font-extrabold tracking-tight">Pavanatma Predictor</div>
-              <div className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Pavanatma College · Murickassery
-              </div>
-            </div>
-          </Link>
+          <Link to="/dashboard">
+           <img
+            src={headerImage}
+            alt="Pavanatma Predictor"
+            className="h-12 w-auto"
+           />
+       </Link>
           <nav className="hidden items-center gap-1 md:flex">
             {nav.map((n) => (
               <Link
