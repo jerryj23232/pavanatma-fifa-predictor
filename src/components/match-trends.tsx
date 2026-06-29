@@ -41,16 +41,17 @@ export function MatchTrends({ matchId, homeTeam, awayTeam }: { matchId: string; 
       <div className="mb-2 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
         <span className="flex items-center gap-1"><Users className="h-3 w-3" /> Community ({total})</span>
       </div>
-      <div className="flex h-2 overflow-hidden rounded-full bg-muted">
-        <div className="bg-emerald" style={{ width: `${home_pct}%` }} />
-        <div className="bg-muted-foreground/40" style={{ width: `${draw_pct}%` }} />
-        <div className="bg-navy" style={{ width: `${away_pct}%` }} />
-      </div>
-      <div className="mt-1.5 grid grid-cols-3 text-[10px] font-semibold">
-        <span className="text-emerald">{home_pct}% {homeTeam}</span>
-        <span className="text-center text-muted-foreground">{draw_pct}% Draw</span>
-        <span className="text-right text-navy">{away_pct}% {awayTeam}</span>
-      </div>
+    <div className="flex h-2 overflow-hidden rounded-full bg-muted">
+  <div className="bg-green-500" style={{ width: `${home_pct}%` }} />
+  <div className="bg-zinc-500" style={{ width: `${draw_pct}%` }} />
+  <div className="bg-amber-500" style={{ width: `${away_pct}%` }} />
+</div>
+
+<div className="mt-1.5 grid grid-cols-3 text-[10px] font-semibold">
+  <span className="text-green-400">{home_pct}% {homeTeam}</span>
+  <span className="text-center text-zinc-400">{draw_pct}% Draw</span>
+  <span className="text-right text-amber-400">{away_pct}% {awayTeam}</span>
+</div>
       {top_scores.length > 0 && (
         <div className="mt-2 border-t pt-2">
           <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Most popular</div>
