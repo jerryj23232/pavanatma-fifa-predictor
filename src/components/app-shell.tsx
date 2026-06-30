@@ -122,7 +122,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile bottom nav */}
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border glass md:hidden">
-        <div className="mx-auto grid max-w-6xl grid-cols-5">
+        <div className="mx-auto grid max-w-6xl"
+             style={{ gridTemplateColumns: `repeat(${nav.length}, minmax(0, 1fr))` }}
+            >
           {nav.map((n) => {
             const Icon = n.icon;
             return (
