@@ -1,4 +1,4 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useLocation, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Trophy, Shield, LogOut, Settings } from "lucide-react";
@@ -19,6 +19,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { ReactNode } from "react";
 import headerImage from "@/assets/nav/header.png";
+import dashboardGray from "@/assets/nav/dashboard-gray.png";
+import matchesGray from "@/assets/nav/matches-gray.png";
+import leaderboardGray from "@/assets/nav/leaderboard-gray.png";
+import profileGray from "@/assets/nav/profile-gray.png";
 
 function initialsOf(name: string | null | undefined, email: string | null | undefined) {
   const src = (name || email || "").trim();
@@ -29,6 +33,7 @@ function initialsOf(name: string | null | undefined, email: string | null | unde
 
 export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const location = useLocation();
   const { user } = useAuth();
   const { isAdmin } = useIsAdmin(user?.id);
 
@@ -46,13 +51,43 @@ export function AppShell({ children }: { children: ReactNode }) {
     router.navigate({ to: "/auth", replace: true });
   };
 
-  type NavItem = { to: string; label: string; img?: string; scale?: number; icon?: typeof Shield };
+  type NavItem = {
+  to: string;
+  label: string;
+  img?: string;
+  activeImg?: string;
+  scale?: number;
+  icon?: typeof Shield;
+};
   const nav: NavItem[] = [
-    { to: "/dashboard", label: "Dashboard", img: navDashboard.url, scale: 1.2 },
-    { to: "/matches", label: "Matches", img: navMatches.url, scale: 1.2 },
-    { to: "/leaderboard", label: "Leaderboard", img: navLeaderboard.url, scale: 1.15 },
-    { to: "/profile", label: "Profile", img: navProfile.url, scale: 1.0 },
-    ...(isAdmin ? [{ to: "/admin", label: "Admin", icon: Shield }] : []),
+        {
+        to: "/dashboard",
+         label: "Dashboard",
+         img: dashboardGray,
+         activeImg: navDashboard.url,
+         scale: 1.2,
+        },
+        {
+         to: "/matches",
+         label: "Matches",
+         img: matchesGray,
+         activeImg: navMatches.url,
+         scale: 1.2,
+        },
+{
+  to: "/leaderboard",
+  label: "Leaderboard",
+  img: leaderboardGray,
+  activeImg: navLeaderboard.url,
+  scale: 1.15,
+},
+{
+  to: "/profile",
+  label: "Profile",
+  img: profileGray,
+  activeImg: navProfile.url,
+  scale: 1.0,
+},
   ];
 
   const initials = initialsOf(profile?.full_name, user?.email);
@@ -126,6 +161,7 @@ export function AppShell({ children }: { children: ReactNode }) {
              style={{ gridTemplateColumns: `repeat(${nav.length}, minmax(0, 1fr))` }}
             >
           {nav.map((n) => {
+             const isActive = location.pathname === n.to;
             const Icon = n.icon;
             return (
               <Link
@@ -137,7 +173,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <span className="flex h-6 w-6 items-center justify-center">
                   {n.img ? (
                     <img
-                      src={n.img}
+                      src={isActive ? (n.activeImg ?? n.img) : n.img}
                       alt=""
                       aria-hidden
                       className="h-full w-full object-contain"
