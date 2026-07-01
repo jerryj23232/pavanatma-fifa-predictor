@@ -221,12 +221,14 @@ export type Database = {
           accuracy_percentage: number
           average_points_per_match: number
           best_matchday_score: number
+          bonus_points: number
           completed_predictions: number
           correct_winners: number
           current_rank: number | null
           current_streak: number
           exact_scores: number
           longest_streak: number
+          prediction_points: number
           predictions_count: number
           previous_rank: number | null
           rank_snapshot_at: string | null
@@ -238,12 +240,14 @@ export type Database = {
           accuracy_percentage?: number
           average_points_per_match?: number
           best_matchday_score?: number
+          bonus_points?: number
           completed_predictions?: number
           correct_winners?: number
           current_rank?: number | null
           current_streak?: number
           exact_scores?: number
           longest_streak?: number
+          prediction_points?: number
           predictions_count?: number
           previous_rank?: number | null
           rank_snapshot_at?: string | null
@@ -255,12 +259,14 @@ export type Database = {
           accuracy_percentage?: number
           average_points_per_match?: number
           best_matchday_score?: number
+          bonus_points?: number
           completed_predictions?: number
           correct_winners?: number
           current_rank?: number | null
           current_streak?: number
           exact_scores?: number
           longest_streak?: number
+          prediction_points?: number
           predictions_count?: number
           previous_rank?: number | null
           rank_snapshot_at?: string | null
