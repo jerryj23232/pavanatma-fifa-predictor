@@ -1,7 +1,6 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useIsAdmin } from "@/hooks/use-is-admin";
@@ -14,7 +13,6 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { flagFor } from "@/lib/flags";
 import { Trash2, RefreshCw } from "lucide-react";
-import { syncMatches } from "@/lib/sync-matches.functions";
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
