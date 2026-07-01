@@ -49,10 +49,18 @@ function AdminPage() {
 
 function SyncMatchesButton() {
   const qc = useQueryClient();
-  const sync = useServerFn(syncMatches);
   const m = useMutation({
-    mutationFn: async () => await sync(),
-    onSuccess: (r: { fetched: number; upserted: number }) => {
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("sync-matches", {
+        body: {},
+      });
+      if (error) throw new Error(error.message);
+      if (data && (data as { ok?: boolean; error?: string }).ok === false) {
+        throw new Error((data as { error?: string }).error ?? "Sync failed");
+      }
+      return data as { fetched: number; upserted: number };
+    },
+    onSuccess: (r) => {
       toast.success(`Synced ${r.upserted} of ${r.fetched} fixtures`);
       qc.invalidateQueries({ queryKey: ["admin-matches"] });
       qc.invalidateQueries({ queryKey: ["all-matches"] });
