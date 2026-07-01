@@ -228,6 +228,7 @@ export type Database = {
           current_streak: number
           exact_scores: number
           longest_streak: number
+          prediction_points: number
           predictions_count: number
           previous_rank: number | null
           rank_snapshot_at: string | null
@@ -246,6 +247,7 @@ export type Database = {
           current_streak?: number
           exact_scores?: number
           longest_streak?: number
+          prediction_points?: number
           predictions_count?: number
           previous_rank?: number | null
           rank_snapshot_at?: string | null
@@ -264,6 +266,7 @@ export type Database = {
           current_streak?: number
           exact_scores?: number
           longest_streak?: number
+          prediction_points?: number
           predictions_count?: number
           previous_rank?: number | null
           rank_snapshot_at?: string | null
