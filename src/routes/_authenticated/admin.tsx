@@ -1,7 +1,6 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useIsAdmin } from "@/hooks/use-is-admin";
@@ -14,7 +13,6 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { flagFor } from "@/lib/flags";
 import { Trash2, RefreshCw } from "lucide-react";
-import { syncMatches } from "@/lib/sync-matches.functions";
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -51,10 +49,18 @@ function AdminPage() {
 
 function SyncMatchesButton() {
   const qc = useQueryClient();
-  const sync = useServerFn(syncMatches);
   const m = useMutation({
-    mutationFn: async () => await sync(),
-    onSuccess: (r: { fetched: number; upserted: number }) => {
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("sync-matches", {
+        body: {},
+      });
+      if (error) throw new Error(error.message);
+      if (data && (data as { ok?: boolean; error?: string }).ok === false) {
+        throw new Error((data as { error?: string }).error ?? "Sync failed");
+      }
+      return data as { fetched: number; upserted: number };
+    },
+    onSuccess: (r) => {
       toast.success(`Synced ${r.upserted} of ${r.fetched} fixtures`);
       qc.invalidateQueries({ queryKey: ["admin-matches"] });
       qc.invalidateQueries({ queryKey: ["all-matches"] });
