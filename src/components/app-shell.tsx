@@ -66,7 +66,9 @@ export function AppShell({ children }: { children: ReactNode }) {
          img: dashboardGray,
          activeImg: navDashboard.url,
          scale: 1.2,
-        },
+        },...(isAdmin
+              ? [{ to: "/admin", label: "Admin", icon: Shield }]
+            : []),
         {
          to: "/matches",
          label: "Matches",
