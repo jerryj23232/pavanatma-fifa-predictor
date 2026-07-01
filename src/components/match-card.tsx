@@ -159,9 +159,9 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
         ) : (
           <div className="space-y-2">
             {prediction && (
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald">
-                <Check className="h-3 w-3" /> Prediction submitted — you can edit until kickoff
-              </div>
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-400">
+                    <Check className="h-3 w-3 text-emerald" />Prediction submitted — you can edit until kickoff
+                  </div>
             )}
             <div className="flex items-center gap-2">
             <Input
@@ -184,13 +184,17 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
               aria-label="Away score"
             />
             <Button
-              onClick={() => save.mutate()}
-              disabled={save.isPending}
-              size="sm"
-              className="ml-auto bg-emerald text-emerald-foreground hover:bg-emerald/90"
-            >
-              {prediction ? "Update" : "Predict"}
-            </Button>
+                 onClick={() => save.mutate()}
+                 disabled={save.isPending}
+                 size="sm"
+                  className={
+                   prediction
+                   ? "ml-auto border border-zinc-600 bg-transparent text-zinc-200 hover:border-white hover:bg-white hover:text-black transition-colors"
+                       : "ml-auto bg-emerald text-emerald-foreground hover:bg-emerald/90"
+                   }
+                        >
+                   {prediction ? "Update" : "Predict"}
+                </Button>
             </div>
           </div>
         )}

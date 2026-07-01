@@ -28,7 +28,7 @@ function StatCard({ label, value }: StatCardProps) {
         {label}
       </span>
       <span
-        className="mt-0.5 sm:mt-1 font-bold leading-none text-[#39ff14]"
+        className="mt-0.5 sm:mt-1 font-bold leading-none text-white"
         style={{
           fontFamily: "'Geist', sans-serif",
           fontSize: "clamp(1.35rem, 5vw, 2.25rem)",
