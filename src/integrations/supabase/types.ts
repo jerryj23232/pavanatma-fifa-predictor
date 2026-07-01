@@ -221,6 +221,7 @@ export type Database = {
           accuracy_percentage: number
           average_points_per_match: number
           best_matchday_score: number
+          bonus_points: number
           completed_predictions: number
           correct_winners: number
           current_rank: number | null
@@ -238,6 +239,7 @@ export type Database = {
           accuracy_percentage?: number
           average_points_per_match?: number
           best_matchday_score?: number
+          bonus_points?: number
           completed_predictions?: number
           correct_winners?: number
           current_rank?: number | null
@@ -255,6 +257,7 @@ export type Database = {
           accuracy_percentage?: number
           average_points_per_match?: number
           best_matchday_score?: number
+          bonus_points?: number
           completed_predictions?: number
           correct_winners?: number
           current_rank?: number | null
