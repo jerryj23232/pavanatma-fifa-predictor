@@ -38,6 +38,86 @@ export type Database = {
         }
         Relationships: []
       }
+      bonus_challenges: {
+        Row: {
+          correct_teams: Json | null
+          created_at: string
+          deadline: string
+          description: string | null
+          evaluated_at: string | null
+          id: string
+          is_active: boolean
+          team_pool: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          correct_teams?: Json | null
+          created_at?: string
+          deadline: string
+          description?: string | null
+          evaluated_at?: string | null
+          id?: string
+          is_active?: boolean
+          team_pool?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          correct_teams?: Json | null
+          created_at?: string
+          deadline?: string
+          description?: string | null
+          evaluated_at?: string | null
+          id?: string
+          is_active?: boolean
+          team_pool?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bonus_predictions: {
+        Row: {
+          awarded_at: string | null
+          challenge_id: string
+          created_at: string
+          id: string
+          points_awarded: number
+          teams: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string | null
+          challenge_id: string
+          created_at?: string
+          id?: string
+          points_awarded?: number
+          teams: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string | null
+          challenge_id?: string
+          created_at?: string
+          id?: string
+          points_awarded?: number
+          teams?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bonus_predictions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "bonus_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           away_flag: string | null
@@ -283,6 +363,10 @@ export type Database = {
     Functions: {
       calc_points: {
         Args: { _ah: number; _aw: number; _pa: number; _ph: number }
+        Returns: number
+      }
+      evaluate_bonus_challenge: {
+        Args: { _challenge_id: string; _correct_teams: Json }
         Returns: number
       }
       get_leaderboard: {

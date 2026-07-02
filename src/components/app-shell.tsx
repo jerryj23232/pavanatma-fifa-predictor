@@ -23,6 +23,7 @@ import dashboardGray from "@/assets/nav/dashboard-gray.png";
 import matchesGray from "@/assets/nav/matches-gray.png";
 import leaderboardGray from "@/assets/nav/leaderboard-gray.png";
 import profileGray from "@/assets/nav/profile-gray.png";
+import { BonusChallengeFab } from "@/components/bonus-challenge-fab";
 
 function initialsOf(name: string | null | undefined, email: string | null | undefined) {
   const src = (name || email || "").trim();
@@ -156,6 +157,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
+
+      <BonusChallengeFab />
 
       {/* Mobile bottom nav */}
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border glass md:hidden">
