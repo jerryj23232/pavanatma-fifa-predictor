@@ -23,6 +23,7 @@ import dashboardGray from "@/assets/nav/dashboard-gray.png";
 import matchesGray from "@/assets/nav/matches-gray.png";
 import leaderboardGray from "@/assets/nav/leaderboard-gray.png";
 import profileGray from "@/assets/nav/profile-gray.png";
+import { BonusChallengeFab } from "@/components/bonus-challenge-fab";
 
 function initialsOf(name: string | null | undefined, email: string | null | undefined) {
   const src = (name || email || "").trim();
