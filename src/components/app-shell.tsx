@@ -158,6 +158,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
 
+      <BonusChallengeFab />
+
       {/* Mobile bottom nav */}
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border glass md:hidden">
         <div className="mx-auto grid max-w-6xl"
