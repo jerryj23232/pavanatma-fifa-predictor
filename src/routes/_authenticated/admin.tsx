@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { flagFor } from "@/lib/flags";
 import { Trash2, RefreshCw } from "lucide-react";
+import { ManageAnnouncements } from "@/components/admin-announcements";
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
