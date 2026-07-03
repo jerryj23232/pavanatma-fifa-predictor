@@ -24,6 +24,7 @@ import matchesGray from "@/assets/nav/matches-gray.png";
 import leaderboardGray from "@/assets/nav/leaderboard-gray.png";
 import profileGray from "@/assets/nav/profile-gray.png";
 import { BonusChallengeFab } from "@/components/bonus-challenge-fab";
+import { AnnouncementBanner } from "@/components/announcement-banner";
 
 function initialsOf(name: string | null | undefined, email: string | null | undefined) {
   const src = (name || email || "").trim();
@@ -155,6 +156,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </DropdownMenu>
         </div>
       </header>
+
+      <AnnouncementBanner />
 
       <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
 

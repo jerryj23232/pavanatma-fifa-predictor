@@ -38,6 +38,48 @@ export type Database = {
         }
         Relationships: []
       }
+      announcements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_at: string
+          id: string
+          image_url: string
+          is_active: boolean
+          link_url: string | null
+          priority: number
+          start_at: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_at: string
+          id?: string
+          image_url: string
+          is_active?: boolean
+          link_url?: string | null
+          priority?: number
+          start_at?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_at?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          link_url?: string | null
+          priority?: number
+          start_at?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bonus_challenges: {
         Row: {
           correct_teams: Json | null

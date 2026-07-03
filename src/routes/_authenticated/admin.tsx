@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { flagFor } from "@/lib/flags";
 import { Trash2, RefreshCw } from "lucide-react";
+import { ManageAnnouncements } from "@/components/admin-announcements";
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -39,9 +40,11 @@ function AdminPage() {
         <TabsList>
           <TabsTrigger value="matches">Matches</TabsTrigger>
           <TabsTrigger value="new">Add match</TabsTrigger>
+          <TabsTrigger value="announcements">Announcements</TabsTrigger>
         </TabsList>
         <TabsContent value="matches" className="mt-4"><ManageMatches /></TabsContent>
         <TabsContent value="new" className="mt-4"><AddMatch /></TabsContent>
+        <TabsContent value="announcements" className="mt-4"><ManageAnnouncements /></TabsContent>
       </Tabs>
     </div>
   );
