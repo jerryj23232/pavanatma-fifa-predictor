@@ -44,7 +44,8 @@ export type Database = {
           created_by: string | null
           end_at: string
           id: string
-          image_url: string
+          image_url: string | null
+          images: Json
           is_active: boolean
           link_url: string | null
           priority: number
@@ -57,7 +58,8 @@ export type Database = {
           created_by?: string | null
           end_at: string
           id?: string
-          image_url: string
+          image_url?: string | null
+          images?: Json
           is_active?: boolean
           link_url?: string | null
           priority?: number
@@ -70,7 +72,8 @@ export type Database = {
           created_by?: string | null
           end_at?: string
           id?: string
-          image_url?: string
+          image_url?: string | null
+          images?: Json
           is_active?: boolean
           link_url?: string | null
           priority?: number
