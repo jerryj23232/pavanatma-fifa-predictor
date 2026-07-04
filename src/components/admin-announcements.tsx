@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,12 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Trash2, Pencil, ExternalLink } from "lucide-react";
+import { Trash2, Pencil, ExternalLink, ArrowLeft, ArrowRight, X } from "lucide-react";
 
 type Announcement = {
   id: string;
   title: string | null;
-  image_url: string;
+  image_url: string | null;
+  images: string[] | null;
   link_url: string | null;
   start_at: string;
   end_at: string;
@@ -25,6 +26,12 @@ function toLocalInput(iso: string) {
   const d = new Date(iso);
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function galleryPaths(a: Announcement): string[] {
+  const arr = Array.isArray(a.images) ? a.images.filter(Boolean) : [];
+  if (arr.length > 0) return arr;
+  return a.image_url ? [a.image_url] : [];
 }
 
 export function ManageAnnouncements() {
@@ -40,14 +47,14 @@ export function ManageAnnouncements() {
         .order("priority", { ascending: false })
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as Announcement[];
+      return data as unknown as Announcement[];
     },
   });
 
   const remove = useMutation({
     mutationFn: async (row: Announcement) => {
-      // Best-effort delete storage object first
-      await supabase.storage.from("announcements").remove([row.image_url]);
+      const paths = galleryPaths(row);
+      if (paths.length) await supabase.storage.from("announcements").remove(paths);
       const { error } = await supabase.from("announcements").delete().eq("id", row.id);
       if (error) throw error;
     },
@@ -123,12 +130,13 @@ function Section({
 }
 
 function Row({ row, onEdit, onDelete }: { row: Announcement; onEdit: (a: Announcement) => void; onDelete: (a: Announcement) => void }) {
+  const count = galleryPaths(row).length;
   return (
     <div className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-3 shadow-card">
       <div className="min-w-0">
         <div className="truncate text-sm font-semibold">{row.title || "(untitled)"}</div>
         <div className="text-[11px] text-muted-foreground">
-          {format(new Date(row.start_at), "MMM d HH:mm")} → {format(new Date(row.end_at), "MMM d HH:mm")} · P{row.priority}
+          {format(new Date(row.start_at), "MMM d HH:mm")} → {format(new Date(row.end_at), "MMM d HH:mm")} · P{row.priority} · {count} image{count === 1 ? "" : "s"}
           {!row.is_active && " · inactive"}
         </div>
         {row.link_url && (
@@ -161,6 +169,8 @@ function Row({ row, onEdit, onDelete }: { row: Announcement; onEdit: (a: Announc
   );
 }
 
+type GalleryItem = { path: string; url: string };
+
 function AnnouncementForm({
   editing,
   onDone,
@@ -178,15 +188,35 @@ function AnnouncementForm({
   );
   const [priority, setPriority] = useState(editing?.priority ?? 0);
   const [isActive, setIsActive] = useState(editing?.is_active ?? true);
-  const [file, setFile] = useState<File | null>(null);
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [removedPaths, setRemovedPaths] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
+  // Load signed URLs for existing images (when editing)
+  useEffect(() => {
+    if (!editing) {
+      setGallery([]);
+      return;
+    }
+    const paths = galleryPaths(editing);
+    if (!paths.length) {
+      setGallery([]);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase.storage.from("announcements").createSignedUrls(paths, 60 * 60);
+      const items: GalleryItem[] = (data ?? []).map((d, i) => ({ path: paths[i], url: d.signedUrl || "" }));
+      setGallery(items);
+    })();
+  }, [editing]);
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploading(true);
     try {
-      let imagePath = editing?.image_url ?? "";
-      if (file) {
+      const uploaded: GalleryItem[] = [];
+      for (const file of Array.from(files)) {
         const ext = file.name.split(".").pop() || "png";
         const path = `${crypto.randomUUID()}.${ext}`;
         const { error: upErr } = await supabase.storage.from("announcements").upload(path, file, {
@@ -194,16 +224,48 @@ function AnnouncementForm({
           upsert: false,
         });
         if (upErr) throw upErr;
-        if (editing?.image_url) {
-          await supabase.storage.from("announcements").remove([editing.image_url]);
-        }
-        imagePath = path;
+        const { data: signed } = await supabase.storage.from("announcements").createSignedUrl(path, 60 * 60);
+        uploaded.push({ path, url: signed?.signedUrl || "" });
       }
-      if (!imagePath) throw new Error("Please upload a poster image");
+      setGallery((g) => [...g, ...uploaded]);
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
+  const removeAt = (idx: number) => {
+    setGallery((g) => {
+      const removed = g[idx];
+      if (removed) setRemovedPaths((r) => [...r, removed.path]);
+      return g.filter((_, i) => i !== idx);
+    });
+  };
+
+  const move = (idx: number, dir: -1 | 1) => {
+    setGallery((g) => {
+      const to = idx + dir;
+      if (to < 0 || to >= g.length) return g;
+      const copy = [...g];
+      [copy[idx], copy[to]] = [copy[to], copy[idx]];
+      return copy;
+    });
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (gallery.length === 0) {
+      toast.error("Please upload at least one poster image");
+      return;
+    }
+    setSaving(true);
+    try {
+      const images = gallery.map((g) => g.path);
       const payload = {
         title: title.trim() || null,
-        image_url: imagePath,
+        image_url: images[0],
+        images,
         link_url: linkUrl.trim() || null,
         start_at: new Date(startAt).toISOString(),
         end_at: new Date(endAt).toISOString(),
@@ -220,9 +282,14 @@ function AnnouncementForm({
         if (error) throw error;
         toast.success("Announcement created");
       }
-      setFile(null);
+
+      // Clean up removed storage objects (best-effort)
+      if (removedPaths.length > 0) {
+        await supabase.storage.from("announcements").remove(removedPaths);
+      }
+
       if (!editing) {
-        setTitle(""); setLinkUrl(""); setPriority(0); setIsActive(true);
+        setTitle(""); setLinkUrl(""); setPriority(0); setIsActive(true); setGallery([]); setRemovedPaths([]);
       }
       onDone();
     } catch (err) {
@@ -244,15 +311,62 @@ function AnnouncementForm({
           </Button>
         )}
       </div>
+
       <div>
-        <Label>Poster image {editing && <span className="text-xs text-muted-foreground">(leave empty to keep current)</span>}</Label>
+        <Label>Poster images (upload one or more; shown as a slideshow)</Label>
         <Input
           type="file"
           accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          required={!editing}
+          multiple
+          onChange={(e) => {
+            handleFiles(e.target.files);
+            e.currentTarget.value = "";
+          }}
         />
+        {uploading && <p className="mt-1 text-xs text-muted-foreground">Uploading…</p>}
+
+        {gallery.length > 0 && (
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {gallery.map((g, i) => (
+              <div key={g.path} className="group relative overflow-hidden rounded-lg border bg-background">
+                <img src={g.url} alt="" className="h-32 w-full object-contain" />
+                <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/70 px-2 py-1 text-white opacity-0 transition group-hover:opacity-100">
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      className="rounded p-1 hover:text-neon disabled:opacity-30"
+                      onClick={() => move(i, -1)}
+                      disabled={i === 0}
+                      aria-label="Move left"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded p-1 hover:text-neon disabled:opacity-30"
+                      onClick={() => move(i, 1)}
+                      disabled={i === gallery.length - 1}
+                      aria-label="Move right"
+                    >
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <span className="text-[10px] opacity-70">#{i + 1}</span>
+                  <button
+                    type="button"
+                    className="rounded p-1 text-destructive hover:text-red-400"
+                    onClick={() => removeAt(i)}
+                    aria-label="Remove image"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <Label>Title (optional)</Label>
@@ -289,7 +403,7 @@ function AnnouncementForm({
           </div>
         </div>
       </div>
-      <Button disabled={saving} className="bg-emerald text-emerald-foreground hover:bg-emerald/90">
+      <Button disabled={saving || uploading} className="bg-emerald text-emerald-foreground hover:bg-emerald/90">
         {saving ? "Saving…" : editing ? "Save changes" : "Publish"}
       </Button>
     </form>
