@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 
 type Announcement = {
   id: string;
   title: string | null;
-  image_url: string;
+  image_url: string | null;
+  images: string[] | null;
   link_url: string | null;
   start_at: string;
   end_at: string;
@@ -15,20 +16,11 @@ type Announcement = {
   is_active: boolean;
 };
 
-const DISMISS_KEY = "announcement:dismissed";
-
 export function AnnouncementBanner() {
   const { user } = useAuth();
-  const [dismissed, setDismissed] = useState<string[]>([]);
-
-  useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(DISMISS_KEY);
-      if (raw) setDismissed(JSON.parse(raw));
-    } catch {
-      /* noop */
-    }
-  }, []);
+  const [closed, setClosed] = useState(false);
+  const [index, setIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
 
   const { data: announcement } = useQuery({
     queryKey: ["active-announcement"],
@@ -47,69 +39,148 @@ export function AnnouncementBanner() {
         .limit(1)
         .maybeSingle();
       if (error) throw error;
-      return data as Announcement | null;
+      return data as unknown as Announcement | null;
     },
   });
 
-  const { data: signedUrl } = useQuery({
-    queryKey: ["announcement-signed-url", announcement?.id, announcement?.image_url],
-    enabled: !!announcement?.image_url,
+  const paths = useMemo<string[]>(() => {
+    if (!announcement) return [];
+    const arr = Array.isArray(announcement.images) ? announcement.images.filter(Boolean) : [];
+    if (arr.length > 0) return arr;
+    return announcement.image_url ? [announcement.image_url] : [];
+  }, [announcement]);
+
+  const { data: signedUrls } = useQuery({
+    queryKey: ["announcement-signed-urls", announcement?.id, paths],
+    enabled: !!announcement && paths.length > 0,
     staleTime: 55 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase.storage
         .from("announcements")
-        .createSignedUrl(announcement!.image_url, 60 * 60);
+        .createSignedUrls(paths, 60 * 60);
       if (error) throw error;
-      return data.signedUrl;
+      return (data ?? []).map((d) => d.signedUrl).filter(Boolean) as string[];
     },
   });
 
-  const isDismissed = useMemo(
-    () => (announcement ? dismissed.includes(announcement.id) : false),
-    [announcement, dismissed],
-  );
+  // Lock body scroll while open
+  useEffect(() => {
+    if (!announcement || closed || !signedUrls?.length) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [announcement, closed, signedUrls]);
 
-  if (!announcement || isDismissed || !signedUrl) return null;
+  // Keyboard nav
+  useEffect(() => {
+    if (!announcement || closed) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setClosed(true);
+      if (e.key === "ArrowRight") setIndex((i) => (signedUrls?.length ? (i + 1) % signedUrls.length : i));
+      if (e.key === "ArrowLeft") setIndex((i) => (signedUrls?.length ? (i - 1 + signedUrls.length) % signedUrls.length : i));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [announcement, closed, signedUrls]);
 
-  const dismiss = () => {
-    const next = [...dismissed, announcement.id];
-    setDismissed(next);
-    try {
-      sessionStorage.setItem(DISMISS_KEY, JSON.stringify(next));
-    } catch {
-      /* noop */
-    }
+  if (!announcement || closed || !signedUrls?.length) return null;
+
+  const total = signedUrls.length;
+  const current = signedUrls[Math.min(index, total - 1)];
+  const clickable = !!announcement.link_url;
+
+  const onImageClick = () => {
+    if (announcement.link_url) window.open(announcement.link_url, "_blank", "noopener,noreferrer");
   };
 
-  const clickable = !!announcement.link_url;
-  const onImageClick = () => {
-    if (!announcement.link_url) return;
-    window.open(announcement.link_url, "_blank", "noopener,noreferrer");
+  const next = () => setIndex((i) => (i + 1) % total);
+  const prev = () => setIndex((i) => (i - 1 + total) % total);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current == null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(dx) < 40 || total < 2) return;
+    if (dx < 0) next();
+    else prev();
   };
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 top-0 z-[100] flex justify-center px-4 pt-4 sm:pt-6"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-brightness-50 animate-in fade-in duration-300"
       role="dialog"
+      aria-modal="true"
       aria-label={announcement.title ?? "Announcement"}
+      onClick={() => setClosed(true)}
     >
-      <div className="pointer-events-auto relative animate-in fade-in slide-in-from-top-4 duration-500">
+      <div
+        className="relative animate-in zoom-in-95 fade-in duration-300"
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         <button
           type="button"
-          onClick={dismiss}
-          aria-label="Dismiss announcement"
-          className="absolute -right-2 -top-2 z-10 rounded-full bg-background/90 p-1.5 text-foreground shadow-lg ring-1 ring-neon/40 backdrop-blur transition hover:bg-background hover:text-neon"
+          onClick={() => setClosed(true)}
+          aria-label="Close announcement"
+          className="absolute -right-3 -top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/80 text-white shadow-lg ring-1 ring-white/20 backdrop-blur transition hover:bg-black hover:text-neon"
         >
           <X className="h-4 w-4" />
         </button>
-        <img
-          src={signedUrl}
-          alt={announcement.title ?? "Announcement"}
-          onClick={onImageClick}
-          className={`block h-auto max-h-[70vh] w-auto max-w-[92vw] rounded-2xl object-contain shadow-[0_0_40px_-8px_hsl(var(--neon)/0.45)] sm:max-w-[520px] ${
-            clickable ? "cursor-pointer" : ""
-          }`}
-        />
+
+        <div className="relative">
+          {total > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={prev}
+                aria-label="Previous"
+                className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white ring-1 ring-white/15 backdrop-blur transition hover:bg-black/80 hover:text-neon"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={next}
+                aria-label="Next"
+                className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white ring-1 ring-white/15 backdrop-blur transition hover:bg-black/80 hover:text-neon"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </>
+          )}
+
+          <img
+            key={current}
+            src={current}
+            alt={announcement.title ?? "Announcement"}
+            onClick={onImageClick}
+            className={`block h-auto max-h-[85vh] w-auto max-w-[92vw] object-contain shadow-[0_0_60px_-10px_hsl(var(--neon)/0.55)] animate-in fade-in duration-300 sm:max-w-[640px] ${
+              clickable ? "cursor-pointer" : ""
+            }`}
+          />
+        </div>
+
+        {total > 1 && (
+          <div className="mt-3 flex items-center justify-center gap-2">
+            {signedUrls.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`Go to slide ${i + 1}`}
+                onClick={() => setIndex(i)}
+                className={`h-2 rounded-full transition-all ${
+                  i === index ? "w-6 bg-neon" : "w-2 bg-white/40 hover:bg-white/70"
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
