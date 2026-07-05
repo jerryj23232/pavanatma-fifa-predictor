@@ -1,0 +1,1 @@
+UPDATE public.bonus_challenges SET deadline = now() + interval '2 days' WHERE is_active = true;
