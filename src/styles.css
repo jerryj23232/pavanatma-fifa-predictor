@@ -170,3 +170,11 @@
 .font-body {
   font-family: var(--font-body);
 }
+
+@keyframes trophy-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-trophy-float {
+  animation: trophy-float 3s ease-in-out infinite;
+}
