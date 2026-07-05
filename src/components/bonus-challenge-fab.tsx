@@ -3,7 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { flagFor } from "@/lib/flags";
-import { Trophy, Check, Loader2, Timer } from "lucide-react";
+import { Check, Loader2, Timer } from "lucide-react";
+import trophyAsset from "@/assets/trophy.png.asset.json";
 import {
   Dialog,
   DialogContent,
@@ -46,8 +47,13 @@ function useCountdown(deadline: string | undefined) {
     const h = Math.floor((s % 86400) / 3600);
     const m = Math.floor((s % 3600) / 60);
     const sec = s % 60;
+    const pad = (n: number) => n.toString().padStart(2, "0");
     const label =
-      d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+      d > 0
+        ? `${d}d ${pad(h)}h`
+        : h > 0
+        ? `${pad(h)}:${pad(m)}:${pad(sec)}`
+        : `${pad(m)}:${pad(sec)}`;
     return { expired: false, label };
   }, [deadline, now]);
 }
@@ -100,10 +106,11 @@ export function BonusChallengeFab() {
     }
   }, [open, prediction]);
 
-  if (!user || !challenge) return null;
-  if (locked && !submitted) return null; // hide after deadline if not submitted
+  // Hide entirely when no active challenge or deadline has passed
+  if (!user || !challenge || locked) return null;
 
   const toggle = (team: string) => {
+    if (locked || submitted) return;
     setSelected((prev) => {
       if (prev.includes(team)) return prev.filter((t) => t !== team);
       if (prev.length >= 4) {
@@ -148,28 +155,34 @@ export function BonusChallengeFab() {
         onClick={() => setOpen(true)}
         aria-label="Open bonus challenge"
         className={cn(
-          "fixed right-4 z-40 flex items-center gap-2 rounded-full px-4 py-3 text-xs font-bold shadow-glow transition",
+          "fixed right-4 z-40 group",
           "bottom-[calc(4.75rem+env(safe-area-inset-bottom))] md:bottom-6",
-          submitted
-            ? "bg-secondary text-neon border border-neon/40"
-            : "bg-neon text-neon-foreground hover:brightness-110 animate-pulse",
+          "flex flex-col items-center focus:outline-none",
         )}
       >
-        {submitted ? (
-          <>
-            <Check className="h-4 w-4" />
-            <span>Submitted</span>
-          </>
-        ) : (
-          <>
-            <Trophy className="h-4 w-4" />
-            <span className="hidden sm:inline">Bonus Challenge</span>
-            <span className="flex items-center gap-1 rounded-full bg-black/25 px-2 py-0.5 font-mono text-[10px]">
-              <Timer className="h-3 w-3" />
-              {countdown.label}
+        <div className="relative animate-trophy-float">
+          <img
+            src={trophyAsset.url}
+            alt="FIFA Bonus Challenge"
+            className="h-24 w-auto drop-shadow-[0_8px_24px_rgba(57,255,20,0.35)] transition-transform group-hover:scale-105 group-active:scale-95"
+            draggable={false}
+          />
+          {submitted && (
+            <span className="absolute -right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-background bg-neon text-neon-foreground shadow-glow">
+              <Check className="h-3.5 w-3.5" strokeWidth={3} />
             </span>
-          </>
-        )}
+          )}
+          <span
+            className={cn(
+              "absolute left-1/2 -translate-x-1/2 -bottom-1",
+              "flex items-center gap-1 rounded-full border border-neon/60 bg-black/85 px-2 py-0.5",
+              "font-mono text-[10px] font-bold text-neon shadow-glow whitespace-nowrap backdrop-blur",
+            )}
+          >
+            <Timer className="h-2.5 w-2.5" />
+            {countdown.label}
+          </span>
+        </div>
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -203,7 +216,9 @@ export function BonusChallengeFab() {
 
           <div>
             <div className="mb-2 flex items-center justify-between text-xs">
-              <span className="font-semibold">Pick 4 teams</span>
+              <span className="font-semibold">
+                {submitted ? "Your picks" : "Pick 4 teams"}
+              </span>
               <span className={cn("font-mono", selected.length === 4 ? "text-neon" : "text-muted-foreground")}>
                 {selected.length}/4
               </span>
@@ -211,18 +226,20 @@ export function BonusChallengeFab() {
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {challenge.team_pool.map((team) => {
                 const isSel = selected.includes(team);
+                const readOnly = submitted;
                 return (
                   <button
                     key={team}
                     type="button"
-                    disabled={locked}
+                    disabled={locked || readOnly}
                     onClick={() => toggle(team)}
                     className={cn(
                       "flex items-center gap-2 rounded-lg border px-2 py-2 text-left text-xs transition",
                       isSel
                         ? "border-neon bg-neon/10 text-foreground shadow-glow"
                         : "border-border bg-card text-muted-foreground hover:border-neon/40 hover:text-foreground",
-                      locked && "opacity-60",
+                      (locked || readOnly) && !isSel && "opacity-50",
+                      readOnly && "cursor-default",
                     )}
                   >
                     <span className="text-lg leading-none">{flagFor(team)}</span>
@@ -235,18 +252,24 @@ export function BonusChallengeFab() {
 
           <div className="flex items-center justify-between gap-2 pt-2">
             <div className="text-xs text-muted-foreground">
-              {submitted && !locked && "You can update your picks until the deadline."}
-              {submitted && locked && "Predictions are locked."}
+              {submitted && "Your picks are locked in. Good luck!"}
               {!submitted && !locked && "Submitting locks in your picks."}
             </div>
-            <Button
-              onClick={submit}
-              disabled={locked || submitting || selected.length !== 4}
-              className="bg-neon text-neon-foreground hover:brightness-110"
-            >
-              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {submitted ? "Update" : "Submit"}
-            </Button>
+            {!submitted && (
+              <Button
+                onClick={submit}
+                disabled={locked || submitting || selected.length !== 4}
+                className="bg-neon text-neon-foreground hover:brightness-110"
+              >
+                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Submit
+              </Button>
+            )}
+            {submitted && (
+              <Button variant="secondary" onClick={() => setOpen(false)}>
+                Close
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>
