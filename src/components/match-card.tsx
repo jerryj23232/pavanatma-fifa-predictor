@@ -209,7 +209,7 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
             />
             <Button
                  onClick={() => save.mutate()}
-                 disabled={save.isPending}
+                 disabled={save.isPending || (needsAdvancing && !adv)}
                  size="sm"
                   className={
                    prediction
@@ -220,7 +220,36 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
                    {prediction ? "Update" : "Predict"}
                 </Button>
             </div>
+
+            {needsAdvancing && (
+              <div className="mt-2 rounded-xl border border-neon/40 bg-neon/5 p-2.5">
+                <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-neon">
+                  Who Advances?
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[match.home_team, match.away_team].map((team) => {
+                    const selected = adv === team;
+                    return (
+                      <button
+                        key={team}
+                        type="button"
+                        onClick={() => setAdv(team)}
+                        className={`flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs font-semibold transition-colors ${
+                          selected
+                            ? "border-neon bg-neon text-black"
+                            : "border-zinc-700 bg-transparent text-zinc-300 hover:border-neon/60"
+                        }`}
+                      >
+                        <span className={`h-2.5 w-2.5 rounded-full border ${selected ? "border-black bg-black" : "border-zinc-500"}`} />
+                        <span className="truncate">{team}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
+
         )}
       </div>
 
