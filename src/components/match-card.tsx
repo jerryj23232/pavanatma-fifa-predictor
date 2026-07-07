@@ -32,22 +32,35 @@ export interface Prediction {
   predicted_home: number;
   predicted_away: number;
   points: number;
+  advancing_team?: string | null;
 }
+
 
 export function MatchCard({ match, prediction }: { match: Match; prediction?: Prediction }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [h, setH] = useState<number | "">(prediction?.predicted_home ?? "");
   const [a, setA] = useState<number | "">(prediction?.predicted_away ?? "");
+  const [adv, setAdv] = useState<string | null>(prediction?.advancing_team ?? null);
   const [now, setNow] = useState(() => Date.now());
+
+  const isKnockout = match.stage !== "Group Stage";
+  const isDraw = h !== "" && a !== "" && Number(h) === Number(a);
+  const needsAdvancing = isKnockout && isDraw;
 
   // Sync inputs when a saved prediction loads/changes (e.g. after refresh).
   useEffect(() => {
     if (prediction) {
       setH(prediction.predicted_home);
       setA(prediction.predicted_away);
+      setAdv(prediction.advancing_team ?? null);
     }
-  }, [prediction?.id, prediction?.predicted_home, prediction?.predicted_away]);
+  }, [prediction?.id, prediction?.predicted_home, prediction?.predicted_away, prediction?.advancing_team]);
+
+  // Clear advancing selection if prediction becomes non-draw
+  useEffect(() => {
+    if (!needsAdvancing && adv !== null) setAdv(null);
+  }, [needsAdvancing]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 30_000);
@@ -61,11 +74,13 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
     mutationFn: async () => {
       if (!user) throw new Error("Sign in required");
       if (h === "" || a === "") throw new Error("Enter both scores");
+      if (needsAdvancing && !adv) throw new Error("Select who advances");
       const payload = {
         user_id: user.id,
         match_id: match.id,
         predicted_home: Number(h),
         predicted_away: Number(a),
+        advancing_team: needsAdvancing ? adv : null,
       };
       const { error } = await supabase.from("predictions").upsert(payload, { onConflict: "user_id,match_id" });
       if (error) throw error;
@@ -76,6 +91,7 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   const correctOutcome =
     match.status === "completed" &&
@@ -131,30 +147,38 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
               <Lock className="h-3.5 w-3.5" /> Your call
             </div>
             {prediction ? (
-              <div className="flex items-center gap-3">
-                <span className="font-bold tabular-nums">
-                  {prediction.predicted_home} – {prediction.predicted_away}
-                </span>
-                {match.status === "completed" && (
-                  <Badge
-                    className={
-                      prediction.points === 3
-                        ? "bg-gold text-gold-foreground"
-                        : prediction.points === 1
-                        ? "bg-emerald text-emerald-foreground"
-                        : "bg-muted text-muted-foreground"
-                    }
-                  >
-                    +{prediction.points}
-                  </Badge>
-                )}
-                {match.status === "completed" && correctOutcome && prediction.points === 1 && (
-                  <Check className="h-3.5 w-3.5 text-emerald" />
+              <div className="flex flex-col items-end gap-1">
+                <div className="flex items-center gap-3">
+                  <span className="font-bold tabular-nums">
+                    {prediction.predicted_home} – {prediction.predicted_away}
+                  </span>
+                  {match.status === "completed" && (
+                    <Badge
+                      className={
+                        prediction.points === 3
+                          ? "bg-gold text-gold-foreground"
+                          : prediction.points === 1
+                          ? "bg-emerald text-emerald-foreground"
+                          : "bg-muted text-muted-foreground"
+                      }
+                    >
+                      +{prediction.points}
+                    </Badge>
+                  )}
+                  {match.status === "completed" && correctOutcome && prediction.points === 1 && (
+                    <Check className="h-3.5 w-3.5 text-emerald" />
+                  )}
+                </div>
+                {prediction.advancing_team && (
+                  <span className="text-[11px] text-muted-foreground">
+                    Advances: <span className="font-semibold text-neon">{prediction.advancing_team}</span>
+                  </span>
                 )}
               </div>
             ) : (
               <span className="text-xs text-muted-foreground">No prediction</span>
             )}
+
           </div>
         ) : (
           <div className="space-y-2">
@@ -185,7 +209,7 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
             />
             <Button
                  onClick={() => save.mutate()}
-                 disabled={save.isPending}
+                 disabled={save.isPending || (needsAdvancing && !adv)}
                  size="sm"
                   className={
                    prediction
@@ -196,7 +220,36 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
                    {prediction ? "Update" : "Predict"}
                 </Button>
             </div>
+
+            {needsAdvancing && (
+              <div className="mt-2 rounded-xl border border-neon/40 bg-neon/5 p-2.5">
+                <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-neon">
+                  Who Advances?
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[match.home_team, match.away_team].map((team) => {
+                    const selected = adv === team;
+                    return (
+                      <button
+                        key={team}
+                        type="button"
+                        onClick={() => setAdv(team)}
+                        className={`flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs font-semibold transition-colors ${
+                          selected
+                            ? "border-neon bg-neon text-black"
+                            : "border-zinc-700 bg-transparent text-zinc-300 hover:border-neon/60"
+                        }`}
+                      >
+                        <span className={`h-2.5 w-2.5 rounded-full border ${selected ? "border-black bg-black" : "border-zinc-500"}`} />
+                        <span className="truncate">{team}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
+
         )}
       </div>
 

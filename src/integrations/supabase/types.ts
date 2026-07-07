@@ -225,6 +225,7 @@ export type Database = {
       }
       predictions: {
         Row: {
+          advancing_team: string | null
           created_at: string
           id: string
           match_id: string
@@ -235,6 +236,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          advancing_team?: string | null
           created_at?: string
           id?: string
           match_id: string
@@ -245,6 +247,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          advancing_team?: string | null
           created_at?: string
           id?: string
           match_id?: string
@@ -450,6 +453,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_knockout_stage: { Args: { _stage: string }; Returns: boolean }
       recalc_user_stats: { Args: { _user_id: string }; Returns: undefined }
       snapshot_leaderboard_ranks: { Args: never; Returns: undefined }
       verify_sync_webhook: { Args: { _token: string }; Returns: boolean }
