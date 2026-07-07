@@ -147,30 +147,38 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
               <Lock className="h-3.5 w-3.5" /> Your call
             </div>
             {prediction ? (
-              <div className="flex items-center gap-3">
-                <span className="font-bold tabular-nums">
-                  {prediction.predicted_home} – {prediction.predicted_away}
-                </span>
-                {match.status === "completed" && (
-                  <Badge
-                    className={
-                      prediction.points === 3
-                        ? "bg-gold text-gold-foreground"
-                        : prediction.points === 1
-                        ? "bg-emerald text-emerald-foreground"
-                        : "bg-muted text-muted-foreground"
-                    }
-                  >
-                    +{prediction.points}
-                  </Badge>
-                )}
-                {match.status === "completed" && correctOutcome && prediction.points === 1 && (
-                  <Check className="h-3.5 w-3.5 text-emerald" />
+              <div className="flex flex-col items-end gap-1">
+                <div className="flex items-center gap-3">
+                  <span className="font-bold tabular-nums">
+                    {prediction.predicted_home} – {prediction.predicted_away}
+                  </span>
+                  {match.status === "completed" && (
+                    <Badge
+                      className={
+                        prediction.points === 3
+                          ? "bg-gold text-gold-foreground"
+                          : prediction.points === 1
+                          ? "bg-emerald text-emerald-foreground"
+                          : "bg-muted text-muted-foreground"
+                      }
+                    >
+                      +{prediction.points}
+                    </Badge>
+                  )}
+                  {match.status === "completed" && correctOutcome && prediction.points === 1 && (
+                    <Check className="h-3.5 w-3.5 text-emerald" />
+                  )}
+                </div>
+                {prediction.advancing_team && (
+                  <span className="text-[11px] text-muted-foreground">
+                    Advances: <span className="font-semibold text-neon">{prediction.advancing_team}</span>
+                  </span>
                 )}
               </div>
             ) : (
               <span className="text-xs text-muted-foreground">No prediction</span>
             )}
+
           </div>
         ) : (
           <div className="space-y-2">
