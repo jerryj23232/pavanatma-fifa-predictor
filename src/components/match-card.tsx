@@ -41,15 +41,26 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
   const qc = useQueryClient();
   const [h, setH] = useState<number | "">(prediction?.predicted_home ?? "");
   const [a, setA] = useState<number | "">(prediction?.predicted_away ?? "");
+  const [adv, setAdv] = useState<string | null>(prediction?.advancing_team ?? null);
   const [now, setNow] = useState(() => Date.now());
+
+  const isKnockout = match.stage !== "Group Stage";
+  const isDraw = h !== "" && a !== "" && Number(h) === Number(a);
+  const needsAdvancing = isKnockout && isDraw;
 
   // Sync inputs when a saved prediction loads/changes (e.g. after refresh).
   useEffect(() => {
     if (prediction) {
       setH(prediction.predicted_home);
       setA(prediction.predicted_away);
+      setAdv(prediction.advancing_team ?? null);
     }
-  }, [prediction?.id, prediction?.predicted_home, prediction?.predicted_away]);
+  }, [prediction?.id, prediction?.predicted_home, prediction?.predicted_away, prediction?.advancing_team]);
+
+  // Clear advancing selection if prediction becomes non-draw
+  useEffect(() => {
+    if (!needsAdvancing && adv !== null) setAdv(null);
+  }, [needsAdvancing]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 30_000);
@@ -63,11 +74,13 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
     mutationFn: async () => {
       if (!user) throw new Error("Sign in required");
       if (h === "" || a === "") throw new Error("Enter both scores");
+      if (needsAdvancing && !adv) throw new Error("Select who advances");
       const payload = {
         user_id: user.id,
         match_id: match.id,
         predicted_home: Number(h),
         predicted_away: Number(a),
+        advancing_team: needsAdvancing ? adv : null,
       };
       const { error } = await supabase.from("predictions").upsert(payload, { onConflict: "user_id,match_id" });
       if (error) throw error;
@@ -78,6 +91,7 @@ export function MatchCard({ match, prediction }: { match: Match; prediction?: Pr
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   const correctOutcome =
     match.status === "completed" &&
