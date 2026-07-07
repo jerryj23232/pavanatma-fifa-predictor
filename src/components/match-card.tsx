@@ -32,7 +32,9 @@ export interface Prediction {
   predicted_home: number;
   predicted_away: number;
   points: number;
+  advancing_team?: string | null;
 }
+
 
 export function MatchCard({ match, prediction }: { match: Match; prediction?: Prediction }) {
   const { user } = useAuth();
