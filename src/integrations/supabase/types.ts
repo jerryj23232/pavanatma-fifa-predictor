@@ -38,6 +38,33 @@ export type Database = {
         }
         Relationships: []
       }
+      leaderboard_rank_history: {
+        Row: {
+          id: string
+          rank: number
+          snapshot_at: string
+          snapshot_date: string
+          total_points: number
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          rank: number
+          snapshot_at?: string
+          snapshot_date?: string
+          total_points?: number
+          user_id: string
+        }
+        Update: {
+          id?: string
+          rank?: number
+          snapshot_at?: string
+          snapshot_date?: string
+          total_points?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           created_at: string
@@ -445,6 +472,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_tournament_recap: { Args: never; Returns: Json }
       get_user_stats: { Args: { _user_id: string }; Returns: Json }
       has_role: {
         Args: {

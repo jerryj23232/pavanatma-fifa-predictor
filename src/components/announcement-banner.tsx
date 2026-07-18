@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { StoryOverlay } from "@/components/story-overlay";
 
 type Announcement = {
   id: string;
@@ -63,28 +64,6 @@ export function AnnouncementBanner() {
     },
   });
 
-  // Lock body scroll while open
-  useEffect(() => {
-    if (!announcement || closed || !signedUrls?.length) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [announcement, closed, signedUrls]);
-
-  // Keyboard nav
-  useEffect(() => {
-    if (!announcement || closed) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setClosed(true);
-      if (e.key === "ArrowRight") setIndex((i) => (signedUrls?.length ? (i + 1) % signedUrls.length : i));
-      if (e.key === "ArrowLeft") setIndex((i) => (signedUrls?.length ? (i - 1 + signedUrls.length) % signedUrls.length : i));
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [announcement, closed, signedUrls]);
-
   if (!announcement || closed || !signedUrls?.length) return null;
 
   const total = signedUrls.length;
@@ -111,28 +90,21 @@ export function AnnouncementBanner() {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-brightness-50 animate-in fade-in duration-300"
-      role="dialog"
-      aria-modal="true"
-      aria-label={announcement.title ?? "Announcement"}
-      onClick={() => setClosed(true)}
+    <StoryOverlay
+      open
+      onClose={() => setClosed(true)}
+      ariaLabel={announcement.title ?? "Announcement"}
+      contentClassName="animate-in zoom-in-95 fade-in duration-300"
+      closeButtonClassName="-right-3 -top-3"
+      onKeyDown={(event) => {
+        if (event.key === "ArrowRight") next();
+        if (event.key === "ArrowLeft") prev();
+      }}
     >
       <div
-        className="relative animate-in zoom-in-95 fade-in duration-300"
-        onClick={(e) => e.stopPropagation()}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        <button
-          type="button"
-          onClick={() => setClosed(true)}
-          aria-label="Close announcement"
-          className="absolute -right-3 -top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/80 text-white shadow-lg ring-1 ring-white/20 backdrop-blur transition hover:bg-black hover:text-neon"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
         <div className="relative">
           {total > 1 && (
             <>
@@ -182,6 +154,6 @@ export function AnnouncementBanner() {
           </div>
         )}
       </div>
-    </div>
+    </StoryOverlay>
   );
 }

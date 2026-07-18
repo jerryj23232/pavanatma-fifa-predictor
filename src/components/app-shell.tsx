@@ -25,6 +25,7 @@ import leaderboardGray from "@/assets/nav/leaderboard-gray.png";
 import profileGray from "@/assets/nav/profile-gray.png";
 import { BonusChallengeFab } from "@/components/bonus-challenge-fab";
 import { AnnouncementBanner } from "@/components/announcement-banner";
+import { TournamentRecap } from "@/components/tournament-recap";
 
 function initialsOf(name: string | null | undefined, email: string | null | undefined) {
   const src = (name || email || "").trim();
@@ -158,6 +159,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       <AnnouncementBanner />
+      <TournamentRecap isAdmin={isAdmin} />
 
       <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
 
