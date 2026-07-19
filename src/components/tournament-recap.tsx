@@ -183,8 +183,12 @@ function RecapSlide({
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <div className="recap-rise recap-delay-1 mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-neon">
-      <span className="h-px w-8 bg-neon" /> {children}
+    <div className="recap-rise recap-delay-1 mb-4 flex justify-center">
+      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-neon">
+        <span className="h-px w-8 bg-neon" />
+        <span>{children}</span>
+        <span className="h-px w-8 bg-neon" />
+      </div>
     </div>
   );
 }
