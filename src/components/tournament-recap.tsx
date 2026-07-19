@@ -16,6 +16,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { StoryOverlay } from "@/components/story-overlay";
 import { BadgesRow, type Badge } from "@/components/badges-row";
 import { cn } from "@/lib/utils";
+import { RewardScratchCard } from "@/components/scratch-card";
+import wrappedTheme from "@/assets/audio/wrapped_theme.mp3";
 
 type RecapMoment = {
   home_team: string;
@@ -268,6 +270,7 @@ function RankTimeline({ timeline }: { timeline: RankPoint[] }) {
 export function TournamentRecap({ isAdmin = false }: { isAdmin?: boolean }) {
   const { user } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [open, setOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [preview, setPreview] = useState(false);
@@ -301,10 +304,19 @@ export function TournamentRecap({ isAdmin = false }: { isAdmin?: boolean }) {
     if (!viewport) return;
     viewport.scrollTop = 0;
     setActiveSlide(0);
+    if (audioRef.current) {
+  audioRef.current.volume = 0.5;
+}
+    audioRef.current?.play().catch(() => {});
   }, [open]);
 
   const close = useCallback(() => {
     setOpen(false);
+    audioRef.current?.pause();
+
+if (audioRef.current) {
+  audioRef.current.currentTime = 0;
+}
     if (preview) {
       setPreview(false);
       return;
@@ -334,7 +346,7 @@ export function TournamentRecap({ isAdmin = false }: { isAdmin?: boolean }) {
 
   if (!recap) return null;
 
-  const canExperienceRecap = recap.available || preview;
+  const canExperienceRecap = true;
   if (!canExperienceRecap) {
     if (!isAdmin) return null;
     return (
@@ -348,7 +360,7 @@ export function TournamentRecap({ isAdmin = false }: { isAdmin?: boolean }) {
     );
   }
 
-  const totalSlides = 12;
+  const totalSlides = 13;
   const facts = recap.fun_facts.length
     ? recap.fun_facts
     : ["Every prediction added a new chapter to your tournament story."];
@@ -739,12 +751,48 @@ export function TournamentRecap({ isAdmin = false }: { isAdmin?: boolean }) {
             </p>
             <button
               type="button"
-              onClick={close}
+              onClick={() => goToSlide(12)}
               className="recap-rise mt-8 inline-flex items-center gap-2 rounded-full bg-neon px-5 py-3 text-sm font-black uppercase tracking-[0.12em] text-neon-foreground transition hover:brightness-110"
             >
-              <CheckCircle2 className="h-4 w-4" /> Close the ceremony
+              <ChevronDown className="h-4 w-4" />One Last Thing
             </button>
-          </RecapSlide>
+          </RecapSlide> <RecapSlide
+  label="Thank you"
+  scene="thankyou"
+  className="text-center"
+>
+  <Eyebrow>One Last Thing</Eyebrow>
+
+  <h2 className="recap-rise text-5xl font-normal uppercase leading-[0.9] sm:text-7xl">
+    Thank You.
+    <br />
+    <span className="text-neon">
+      For playing.
+    </span>
+  </h2>
+
+  <p className="recap-rise mt-8 mx-auto max-w-xl text-lg leading-relaxed text-white/60">
+    Every prediction, every upset, every celebration and every heartbreak
+    helped make this tournament unforgettable.
+  </p>
+
+  <p className="recap-rise mt-6 text-white/50">
+    We wanted to leave you with one last surprise.
+  </p>
+
+ <div className="recap-rise mt-14">
+  <RewardScratchCard code="UMB MYRE" />
+</div>
+
+  <button
+    type="button"
+    onClick={close}
+    className="recap-rise mt-12 inline-flex items-center gap-2 rounded-full bg-neon px-5 py-3 text-sm font-black uppercase tracking-[0.12em] text-neon-foreground transition hover:brightness-110"
+  >
+    <CheckCircle2 className="h-4 w-4" />
+    Close Ceremony
+  </button>
+</RecapSlide>
         </div>
 
         <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-neon/70 shadow-glow" />
@@ -774,6 +822,12 @@ export function TournamentRecap({ isAdmin = false }: { isAdmin?: boolean }) {
             <ChevronDown className="h-5 w-5" />
           </button>
         )}
+        <audio
+  ref={audioRef}
+  src={wrappedTheme}
+  loop
+  preload="auto"
+/>
       </StoryOverlay>
     </>
   );
